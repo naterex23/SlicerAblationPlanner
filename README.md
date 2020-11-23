@@ -11,7 +11,7 @@ This module was designed to assist in the planning, and intra-procedural decisio
 An appropriate workflow associated with an ablation procedure would resemble the following.
 
 1. A pre-procedure CT of the thorax/abdomen is obtained, in which a lesion to be ablated is identified. 
-2. The lesion is manually segmented in it's native coordinate system using the SegmentEditor tool. 
+2. The lesion is manually segmented in it's native coordinate system ("pre-procedure space") using the SegmentEditor tool. 
 3. The operator imports the appropriate ablation profile for hardware available at the institution.
 4. The operator simulates the position of the ablation profile and evaluates the assocaited "margin", or minimum distance from lesion to the ablation profile. 
 5. On the day of the procedure a preliminary CT is taken. The operator uses landmark fiducials to translate the lesion to "patient table space" from "pre-procedure space."
