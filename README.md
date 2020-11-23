@@ -4,7 +4,7 @@ Ablation Planner
 
 This is an extension for 3D Slicer that is used to plan and evaluate ablation zones. 
 
-This module was developed to address research and clinical decision Support at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University), with the support of -----
+This module was developed to address research and clinical decision support at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University), with the support of -----
 
 This module was designed to assist in the planning, and intra-procedural decision making, of ablation type procedures in the liver, kidney, and lung. 
 
