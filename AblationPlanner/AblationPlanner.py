@@ -170,28 +170,28 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # Do not react to parameter node changes (GUI wlil be updated when the user enters into the module)
     self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
 
-  #def onSceneStartClose(self, caller, event):
+  def onSceneStartClose(self, caller, event):
     """
     Called just before the scene is closed.
     """
     # Parameter node will be reset, do not use it anymore
-    #self.setParameterNode(None)
+    self.setParameterNode(None)
 
-  #def onSceneEndClose(self, caller, event):
+  def onSceneEndClose(self, caller, event):
     """
     Called just after the scene is closed.
     """
     # If this module is shown while the scene is closed then recreate a new parameter node immediately
-    #if self.parent.isEntered:
-      #self.initializeParameterNode()
+    if self.parent.isEntered:
+      self.initializeParameterNode()
 
-  #def initializeParameterNode(self):
+  def initializeParameterNode(self):
     """
     Ensure parameter node exists and observed.
     """
     # Parameter node stores all user choices in parameter values, node selections, etc.
     # so that when the scene is saved and reloaded, these settings are restored.
-    #self.setParameterNode(self.logic.getParameterNode())
+    self.setParameterNode(self.logic.getParameterNode())
 
     # Select default input nodes if nothing is selected yet to save a few clicks for the user
 
@@ -430,7 +430,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         print("Entered fiducial node is null!")
         return
 
-    fidCount = fiducialNodee.GetNumberOfFiducials()
+    fidCount = fiducialNode.GetNumberOfFiducials()
     print("Number of fiducials entered: ", fidCount)
 
     defaultPosition = [0,0,-1]
