@@ -40,3 +40,5 @@ All of the steps of the ablation planning workflow are completed before the day 
 12. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. 
 
 A library of ablation profiles for common manufacturers can be found in the "probe_profiles" folder. 
+
+This extension 
