@@ -28,7 +28,8 @@ Ablation Planning Workflow:
 7. The surgical planner relays relevant information to the proceduralist.
 
 Intra-Operative Support Workflow
--Note that this necessitates intra-op CT scans be available to a workstation with 3DSlicer. At our institution we have programmed the CT scanners in the IR suites to send their outputs to a DICOM listener in 3DSlicer such that when a patient is scanned, their most recent result is immediately available to the technician operating this software can immediately begin work on tailoring the procedure to the patient's anatomy.  (A more detailed description of this process can be found @github.com//////) 
+
+-Note that this necessitates intra-op CT scans be available to a workstation with 3DSlicer. At our institution we have programmed the CT scanners in the IR suites to send their outputs to a DICOM listener in 3DSlicer such that when a patient is scanned, their most recent result is immediately available to the technician operating this software and they can immediately begin work on adjusting the lesion to the patient's anatomy.  (A more detailed description of this process can be found @github.com//////) 
 
 All of the steps of the ablation planning workflow are completed before the day of the procedure. 
 
