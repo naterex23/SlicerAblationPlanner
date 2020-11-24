@@ -15,15 +15,15 @@ Ablation Planning Workflow:
 3. The operator imports the appropriate ablation profile for hardware available at the institution.
 4. The operator places fiducials at locations appropriate to cover the lesion. Note that "odd" fiducials (1,3,5..) correspond to the tip of the probe and that "even" fiducials (2,4,6...) correspond to the approximate position at which the probe enters the body (and therefore should be placed on "patients skin" as represented by the CT)
 
-![fiducial_placement](/Screenshots/fiducial_placement.PNG)
+![fiducial_placement](/Screenshots/fiducial_placement.png)
 
 5. The operator simulates the position of the ablation profile and evaluates the assocaited "margin", or minimum distance from lesion to the ablation profile. 
 
-![combined_probes](/Screenshots/combined_probes.PNG)
+![combined_probes](/Screenshots/combined_probes.png)
 
 6. The output margins are evaluated and probe selection/addition are considered. 
 
-![margin_colors](/Screenshots/margin_colors.PNG)
+![margin_colors](/Screenshots/margin_colors.png)
 
 7. The surgical planner relays relevant information to the proceduralist.
 
