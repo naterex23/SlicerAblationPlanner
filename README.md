@@ -11,7 +11,7 @@ This module was designed to assist in both planning and intra-procedural decisio
 Ablation Planning Workflow:
 
 1. A pre-procedure CT of the thorax/abdomen is obtained, in which a lesion to be ablated is identified. 
-2. The lesion is manually segmented in it's native coordinate system ("pre-procedure space") using the SegmentEditor tool. 
+2. The lesion is manually segmented in it's native coordinate system ("pre-procedure" or "native" space) using the SegmentEditor tool. 
 3. The operator imports the appropriate ablation profile for hardware available at the institution.
 4. The operator places fiducials at locations appropriate to cover the lesion. Note that "odd" fiducials (1,3,5..) correspond to the tip of the probe and that "even" fiducials (2,4,6...) correspond to the approximate position at which the probe enters the body (and therefore should be placed on "patients skin" as represented by the CT)
 
