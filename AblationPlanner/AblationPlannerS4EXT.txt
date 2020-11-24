@@ -38,7 +38,7 @@ status
 This model enables the user to place virtual ablation profiles and evaluate a theoretical margins associated with these profiles.  
 
 # Space separated list of urls
-screenshoturls 
+screenshoturls https://github.com/naterex23/SlicerAblationPlanner/raw/main/AblationPlanner/fiducial_placement.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/AblationPlanner/fiducial_placement.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/AblationPlanner/margin_colors.png
 
 # 0 or 1: Define if the extension should be enabled after its installation.
 enabled 1
