@@ -33,9 +33,9 @@ Intra-Operative Support Workflow
 
 All of the steps of the ablation planning workflow are completed before the day of the procedure. 
 
-8. On the day of the procedure a preliminary CT is taken. The operator uses imports both the the "native" and "new" patient scans, along with the segmented lesion. 
-9. The operator places at minimum 3 sets of corresponding fiducials, 3 in "native" space and 3 in "new" space. Fiducials should be as relevant to the tumor as possible. An example of 3 points for a RCC ablation might include the apex and the nadir of the kidney, as well as a solid bony landmark like a spinus process. 
-10. The extension uses fiducial registration to translate the tumor from "native" space to "new" space. Any additional anatomical adjustments should be made.
+8. On the day of the procedure a preliminary CT is taken. The operator uses imports both the the "native" ("pre-procedure") and "new" ("intra-procedure") patient scans, along with the segmented lesion. 
+9. The operator places at minimum 2 sets of corresponding fiducials, at least 3 in "native" space and 3 in "new" space. Fiducials should be as close to the lesion as possible while maintaining their relative relationship. An example of 3 points for a RCC ablation might include the apex and the nadir of the kidney, as well as a solid bony landmark like a spinus process. 
+10. The extension uses fiducial registration to translate the tumor from "native" space to "new" space. Fiducial registration optomized but is not perfect; any additional adjustments to lesion location can be made using the transform tool.
 11. Simulatenously to these steps, the ablation has proceeded and the probes are placed in the patient. The most recent CT (with probe placement is uploaded and the ablation planning workflow is repeated with the observed probe locations. 
 12. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. 
 
