@@ -113,7 +113,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="MRMLNodeComboBox_5">
+       <widget class="qMRMLNodeComboBox" name="probeNodeSelector">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -178,7 +178,7 @@
          </widget>
         </item>
         <item>
-         <widget class="qMRMLNodeComboBox" name="MRMLNodeComboBox_6">
+         <widget class="qMRMLNodeComboBox" name="tumorSegmentSelector">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -213,7 +213,7 @@
          </widget>
         </item>
         <item>
-         <widget class="qMRMLNodeComboBox" name="MRMLNodeComboBox_3">
+         <widget class="qMRMLNodeComboBox" name="nativeFiducialsSelector">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -254,7 +254,7 @@
          </widget>
         </item>
         <item>
-         <widget class="qMRMLNodeComboBox" name="MRMLNodeComboBox_4">
+         <widget class="qMRMLNodeComboBox" name="newFiducialSelector">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -283,65 +283,6 @@
          <string>Evaluate Tumor Margins</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <property name="leftMargin">
-         <number>11</number>
-        </property>
-        <property name="topMargin">
-         <number>5</number>
-        </property>
-        <property name="rightMargin">
-         <number>11</number>
-        </property>
-        <property name="bottomMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Margin:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="qMRMLSliderWidget" name="MRMLSliderWidget_2"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <property name="leftMargin">
-         <number>11</number>
-        </property>
-        <property name="topMargin">
-         <number>5</number>
-        </property>
-        <property name="rightMargin">
-         <number>11</number>
-        </property>
-        <property name="bottomMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Margin Selector</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="qMRMLSliderWidget" name="MRMLSliderWidget">
-          <property name="maximum">
-           <double>50.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>5.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item>
        <widget class="ctkPushButton" name="PushButton_4">
@@ -375,19 +316,9 @@
    <header>ctkPushButton.h</header>
   </customwidget>
   <customwidget>
-   <class>ctkSliderWidget</class>
-   <extends>QWidget</extends>
-   <header>ctkSliderWidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>qMRMLNodeComboBox</class>
    <extends>QWidget</extends>
    <header>qMRMLNodeComboBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLSliderWidget</class>
-   <extends>ctkSliderWidget</extends>
-   <header>qMRMLSliderWidget.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLWidget</class>
@@ -476,22 +407,6 @@
   <connection>
    <sender>ExtractCenterline</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLSliderWidget</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>251</x>
-     <y>431</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>300</x>
-     <y>678</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ExtractCenterline</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>MarkupsPlaceWidget_2</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
@@ -508,7 +423,7 @@
   <connection>
    <sender>ExtractCenterline</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLNodeComboBox_3</receiver>
+   <receiver>nativeFiducialsSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -524,7 +439,7 @@
   <connection>
    <sender>ExtractCenterline</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLNodeComboBox_4</receiver>
+   <receiver>newFiducialSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -538,23 +453,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>ExtractCenterline</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLSliderWidget_2</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>251</x>
-     <y>431</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>282</x>
-     <y>635</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>MRMLNodeComboBox_3</sender>
+   <sender>nativeFiducialsSelector</sender>
    <signal>currentNodeChanged(vtkMRMLNode*)</signal>
    <receiver>MarkupsPlaceWidget</receiver>
    <slot>setCurrentNode(vtkMRMLNode*)</slot>
@@ -570,7 +469,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>MRMLNodeComboBox_4</sender>
+   <sender>newFiducialSelector</sender>
    <signal>currentNodeChanged(vtkMRMLNode*)</signal>
    <receiver>MarkupsPlaceWidget_2</receiver>
    <slot>setCurrentNode(vtkMRMLNode*)</slot>
@@ -588,7 +487,7 @@
   <connection>
    <sender>ExtractCenterline</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLNodeComboBox_6</receiver>
+   <receiver>tumorSegmentSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -604,7 +503,7 @@
   <connection>
    <sender>ExtractCenterline</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>MRMLNodeComboBox_5</receiver>
+   <receiver>probeNodeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -618,9 +517,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>MRMLNodeComboBox_5</sender>
+   <sender>probeNodeSelector</sender>
    <signal>currentNodeChanged(vtkMRMLNode*)</signal>
-   <receiver>MRMLNodeComboBox_5</receiver>
+   <receiver>probeNodeSelector</receiver>
    <slot>setCurrentNode(vtkMRMLNode*)</slot>
    <hints>
     <hint type="sourcelabel">

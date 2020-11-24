@@ -104,11 +104,11 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     #COMMENTED OUT
 
     self.nodeSelectors = [
-            (self.ui.MRMLNodeComboBox_5, "InputSurface"),
+            (self.ui.probeNodeSelector, "InputSurface"),
             (self.ui.endPointsMarkupsSelector,"EndPoints"),
-            (self.ui.MRMLNodeComboBox_3, "NativeFiducials"),
-            (self.ui.MRMLNodeComboBox_4, "NewFiducials"),
-            (self.ui.MRMLNodeComboBox_6, "InputTumor")
+            (self.ui.nativeFiducialsSelector, "NativeFiducials"),
+            (self.ui.newFiducialSelector, "NewFiducials"),
+            (self.ui.tumorSegmentSelector, "InputTumor")
             ]
 
     # Set scene in MRML widgets. Make sure that in Qt designer the top-level qMRMLWidget's
@@ -220,43 +220,26 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         return
     self.updatingGUIFromParameterNode = True
 
-    wasBlocked = self.ui.MRMLNodeComboBox_5.blockSignals(True)
-    self.ui.MRMLNodeComboBox_5.setCurrentNode(self._parameterNode.GetNodeReference("InputSurface"))
-    self.ui.MRMLNodeComboBox_5.blockSignals(wasBlocked)
+    wasBlocked = self.ui.probeNodeSelector.blockSignals(True)
+    self.ui.probeNodeSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputSurface"))
+    self.ui.probeNodeSelector.blockSignals(wasBlocked)
  
     wasBlocked = self.ui.endPointsMarkupsSelector.blockSignals(True)
     self.ui.endPointsMarkupsSelector.setCurrentNode(self._parameterNode.GetNodeReference("EndPoints"))
     self.ui.endPointsMarkupsSelector.blockSignals(wasBlocked)
 
-    wasBlocked = self.ui.MRMLNodeComboBox_3.blockSignals(True)
-    self.ui.MRMLNodeComboBox_3.setCurrentNode(self._parameterNode.GetNodeReference("NativeFiducialsƒ"))
-    self.ui.MRMLNodeComboBox_3.blockSignals(wasBlocked)
+    wasBlocked = self.ui.nativeFiducialsSelector.blockSignals(True)
+    self.ui.nativeFiducialsSelector.setCurrentNode(self._parameterNode.GetNodeReference("NativeFiducialsƒ"))
+    self.ui.nativeFiducialsSelector.blockSignals(wasBlocked)
 
-    wasBlocked = self.ui.MRMLNodeComboBox_4.blockSignals(True)
-    self.ui.MRMLNodeComboBox_4.setCurrentNode(self._parameterNode.GetNodeReference("NewFiducials"))
-    self.ui.MRMLNodeComboBox_4.blockSignals(wasBlocked)
+    wasBlocked = self.ui.newFiducialSelector.blockSignals(True)
+    self.ui.newFiducialSelector.setCurrentNode(self._parameterNode.GetNodeReference("NewFiducials"))
+    self.ui.newFiducialSelector.blockSignals(wasBlocked)
 
-    wasBlocked = self.ui.MRMLNodeComboBox_6.blockSignals(True)
-    self.ui.MRMLNodeComboBox_6.setCurrentNode(self._parameterNode.GetNodeReference("InputTumor"))
-    self.ui.MRMLNodeComboBox_6.blockSignals(wasBlocked)
+    wasBlocked = self.ui.tumorSegmentSelector.blockSignals(True)
+    self.ui.tumorSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputTumor"))
+    self.ui.tumorSegmentSelector.blockSignals(wasBlocked)
 
-    #consider adding enabled 
-    # Make sure GUI changes do not call updateParameterNodeFromGUI (it could cause infinite loop)
-    #for nodeSelector, roleName in self.nodeSelectors:
-    #    self._parameterNode.SetNodeReferenceID(roleName, nodeSelector.currentNodeID)
-
-    #inputSurfaceNode = self._parameterNode.GetNodeReference("InputSurface")
-    #if inputSurfaceNode and inputSurfaceNode.IsA("vtkMRMLSegmentationNode"):
-    #    self._parameterNode.SetParameter("InputSurfaceID", self.ui.MRMLNodeComboBox_5.currentNodeID)
-    #    self.ui.MRMLNodeComboBox_5.setCurrentNodeID(self._parameterNode.GetParameter("InputSurfaceID"))
-    #    self.ui.MRMLNodeComboBox_5.setVisible(True)
-
-    #inputTumorNode = self._parameterNode.GetNodeReference("InputTumor")
-    #if inputTumorNode:
-    #    if inputTumorNode.IsA("vtkMRMLSegmentationNode"):
-    #        self._parameterNode.SetParameter("InputTumorID", self.ui.MRMLNodeComboBox_4.currentNodeID)
-    #        self.ui.MRMLNodeComboBox_5.setCurrentNodeID(self._parameterNode.GetParameter("InputTumorID"))
-    #        self.ui.MRMLNodeComboBox_5.setVisible(True)
 
     self.updatingGUIFromParameterNode = False
 
@@ -270,23 +253,6 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     for nodeSelector, roleName in self.nodeSelectors:
         self._parameterNode.SetNodeReferenceID(roleName, nodeSelector.currentNodeID)
-
-    #inputSurfaceNode = self._parameterNode.GetNodeReference("InputSurface")
-    #if inputSurfaceNode:
-    #    if inputSurfaceNode.IsA("vtkMRMLSegmentationNode"):
-    #        self._parameterNode.SetParameter("InputSurfaceID", self.ui.MRMLNodeComboBox_5.currentNodeID)
-
-    #self.ui.MRMLNodeComboBox_5.setCurrentNodeID(self._parameterNode.GetParameter("InputSurfaceID"))
-    #self.ui.MRMLNodeComboBox_5.setVisible(inputSurfaceNode and inputSurfaceNode.IsA("vtkMRMLSegmentationNode"))
-
-
-    #inputTumorNode = self._parameterNode.GetNodeReference("InputTumor")
-    #if inputTumorNode:
-    #    if inputTumorNode.IsA("vtkMRMLSegmentationNode"):
-    #        self._parameterNode.SetParameter("InputTumorID", self.ui.MRMLNodeComboBox_4.currentNodeID)
-    #        self.ui.MRMLNodeComboBox_4.setCurrentNodeID(self._parameterNode.GetParameter("InputTumorID"))
-    #        self.ui.MRMLNodeComboBox_4.setVisible(inputTumorNode and inputTumorNode.IsA("vtkMRMLSegmentationNode"))
-
 
 
   def onTumorButton(self):
