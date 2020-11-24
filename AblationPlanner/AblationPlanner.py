@@ -717,36 +717,6 @@ def findModelToModelDistance(modelNode1,modelNode2):
     return vtkOutput
 
 
-    """
-    Run the processing algorithm.
-    Can be used without GUI widget.
-    :param inputVolume: volume to be thresholded
-    :param outputVolume: thresholding result
-    :param imageThreshold: values above/below this threshold will be set to 0
-    :param invert: if True then values above the threshold will be set to 0, otherwise values below are set to 0
-    :param showResult: show output volume in slice viewers
-    """
-
-    #if not inputVolume or not outputVolume:
-    #  raise ValueError("Input or output volume is invalid")
-
-    #import time
-    #startTime = time.time()
-    #logging.info('Processing started')
-
-    # Compute the thresholded output volume using the "Threshold Scalar Volume" CLI module
-    #cliParams = {
-    #  'InputVolume': inputVolume.GetID(),
-    #  'OutputVolume': outputVolume.GetID(),
-    #  'ThresholdValue' : imageThreshold,
-    #  'ThresholdType' : 'Above' if invert else 'Below'
-    #  }
-    #cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True, update_display=showResult)
-    # We don't need the CLI module node anymore, remove it to not clutter the scene with it
-    #slicer.mrmlScene.RemoveNode(cliNode)
-
-    #stopTime = time.time()
-    #logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
 
 #
 # AblationPlannerTest
