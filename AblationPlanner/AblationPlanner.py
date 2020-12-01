@@ -457,7 +457,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     #print("Number of arrays available in VTKFieldData: ", VTKFieldData.GetNumberOfArrays())
     #print("Number of tuples in VTKFieldData", VTKFieldData.GetNumberOfTuples())
 
-    resultTableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Points from surface distance")
+    resultTableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "surface_distances")
     
     for j in range(0,VTKFieldData.GetNumberOfArrays()):
         resultTableNode.AddColumn(VTKFieldData.GetArray(j))
