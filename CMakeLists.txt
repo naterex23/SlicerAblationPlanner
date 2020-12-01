@@ -5,12 +5,12 @@ project(AblationPlanner)
 #-----------------------------------------------------------------------------
 # Extension meta-information
 set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/AblationPlanner")
-set(EXTENSION_CATEGORY "Surgical Planning")
+set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Nathaniel Rex (Brown University), Scott Collins (Rhode Island Hospital)")
-set(EXTENSION_DESCRIPTION "This is a first attempt at the creation of an extension. ")
-set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/AblationPlanner.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/AblationPlanner/Screenshots/1.png")
-set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
+set(EXTENSION_DESCRIPTION "This extension enables the user to place virtual ablation profiles and evaluate a theoretical margins associated with these profiles.  ")
+set(EXTENSION_ICONURL "https://github.com/naterex23/SlicerAblationPlanner/raw/main/AblationPlanner/Resources/Icons/AblationPlanner.png")
+set(EXTENSION_SCREENSHOTURLS "https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/combined_probes.png, https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/fiducial_placement.png, https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/margin_colors.png")
+set(EXTENSION_DEPENDS "ModelToModelDistance") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
@@ -19,7 +19,7 @@ include(${Slicer_USE_FILE})
 
 #-----------------------------------------------------------------------------
 # Extension modules
-add_subdirectory(probe_placer)
+add_subdirectory(AblationPlanner)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
