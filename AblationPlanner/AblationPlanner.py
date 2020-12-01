@@ -501,16 +501,11 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         else:
             VTKFieldDataArray.SetValue(i,high)
 
-
-
-
   def regenerateOriginalModelColors(self, modelNode, originalColorArray):
 
     VTKFieldData = modelNode.GetMesh().GetAttributesAsFieldData(0)
     VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
 
-    #importedData = originalModelFieldData.GetMesh().GetAttributesAsFieldData(0)
-    
     for i in range(0, len(originalColorArray)-1):
         loopArray = originalColorArray[i]
         colorval = loopArray[0]
@@ -527,25 +522,21 @@ def convertSegmentsToSegment(probeNode, nodeIds):
     segmentationNode = slicer.vtkMRMLSegmentationNode()
     slicer.mrmlScene.AddNode(segmentationNode)
     segmentationNode.CreateDefaultDisplayNodes() # only needed for display
-    
-    
 
     slicer.app.processEvents() 
 
     for probeNodeID in nodeIds:
-        print("Processing copy of: ", probeNodeID)
+        #print("Processing copy of: ", probeNodeID)
         duplicateProbeNode = thisScene.GetNodeByID(probeNodeID)
-        #duplicateProbeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
         segmentType = duplicateProbeNode.GetSegmentation().GetMasterRepresentationName()
         slicer.app.processEvents() 
         if (segmentType == "Closed surface"):
-            print("Found a closed surface! ", probeNodeID)
+            #print("Found a closed surface! ", probeNodeID)
             mergedImage = vtk.vtkPolyData()
             duplicateProbeNode.GetClosedSurfaceRepresentation(duplicateProbeNode.GetSegmentation().GetNthSegmentID(0), mergedImage)
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,probeNodeID,[0,1,0])
         else:
-            print("Found a Binary labelmap! ", probeNodeID)
-            #segmentationNode.AddSegmentFromBinaryLabelmapRepresentation(mergedImage,probeNodeID,[1,0,0])
+            #print("Found a Binary labelmap! ", probeNodeID)
             labelmapImage = vtkSegmentationCore.vtkOrientedImageData()
             duplicateProbeNode.GetBinaryLabelmapRepresentation(duplicateProbeNode.GetSegmentation().GetNthSegmentID(0),labelmapImage)
             segmentationNode.AddSegmentFromBinaryLabelmapRepresentation(labelmapImage,probeNodeID,[1,0,0])
@@ -559,17 +550,6 @@ def convertSegmentsToSegment(probeNode, nodeIds):
     segmentEditorNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
     segmentEditorWidget.setMRMLSegmentEditorNode(segmentEditorNode)
     segmentEditorWidget.setSegmentationNode(segmentationNode)
-    #segmentEditorWidget.setMasterVolumeNode(masterVolumeNode)
-
-
-    #segmentEditorWidget.setActiveEffectByName("Logical operators")
-    #effect = segmentEditorWidget.activeEffect()
-    #effect.self().scriptedEffect.setParameter("Operation","UNION")
-    #effect.self().scriptedEffect.setParameter("ModifierSegmentID",segmentationNode.GetSegmentation().GetNthSegmentID(1))
-    #print("Found Nth segmentID: ", segmentationNode.GetSegmentation().GetNthSegmentID(1))
-    #print(effect.self().modifierSegmentID())
-    #effect.self().onApply()
-    #segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
 
     for i in range(1, segmentationNode.GetSegmentation().GetNumberOfSegments()):  #TWO ADDITIONAL PROBES
         segmentEditorWidget.setActiveEffectByName("Logical operators")
@@ -591,14 +571,7 @@ def convertSegmentsToSegment(probeNode, nodeIds):
     segmentationNode.GetSegmentation().SetMasterRepresentationName("Closed surface")
     segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
 
-    #segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
-    #segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(2))
 
-
-
-
-    
-    
     
 
 def applyTransformToProbe(rm, probeNode, xyz1):
@@ -609,16 +582,14 @@ def applyTransformToProbe(rm, probeNode, xyz1):
     [rm[1,0],rm[1,1],rm[1,2], xyz1[1]],
     [rm[2,0],rm[2,1],rm[2,2], xyz1[2]],
     [0,0,0,1]])
-    #SetMatrixTransformToParent
-    #transformNode.SetAndObserveMatrixTransformToParent(slicer.util.vtkMatrixFromArray(transformMatrixNP))
+
     transformNode.SetMatrixTransformToParent(slicer.util.vtkMatrixFromArray(transformMatrixNP))
-    print("Print location 4")
-    slicer.app.processEvents()  # force update
-    time.sleep(1)
+    
+    slicer.app.processEvents()  
+    time.sleep(0.5)
     probeNode.SetAndObserveTransformNodeID(transformNode.GetID())
-    print("Print location 5")
     slicer.app.processEvents()  # force update
-    time.sleep(1)
+    time.sleep(0.5)
     probeNode.HardenTransform()
     time.sleep(0.5)
     slicer.app.processEvents()
@@ -660,7 +631,7 @@ def duplicateProbeNode(fidPairs, probeNode):
             
             slicer.app.processEvents()  # force update
             print("Print Location 1!")
-            time.sleep(1)
+            time.sleep(0.5)
 
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
@@ -675,8 +646,8 @@ def duplicateProbeNode(fidPairs, probeNode):
             segDisplayNode.SetOpacity(0.1)
 
             slicer.app.processEvents()  # force update
-            print("Print Location 2!")
-            time.sleep(1)
+            #print("Print Location 2!")
+            time.sleep(0.5)
             #slicer.app.processEvents()  # force update
             #time.sleep(1)
 
@@ -751,37 +722,14 @@ class AblationPlannerTest(ScriptedLoadableModuleTest):
     module.  For example, if a developer removes a feature that you depend on,
     your test should break so they know that the feature is needed.
     """
-
+    
     self.delayDisplay("Starting the test")
-
+    
     # Get/create input data
 
-    import SampleData
-    registerSampleData()
-    inputVolume = SampleData.downloadSample('AblationPlanner1')
+   
     self.delayDisplay('Loaded test data set')
 
-    inputScalarRange = inputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(inputScalarRange[0], 0)
-    self.assertEqual(inputScalarRange[1], 695)
 
-    outputVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode")
-    threshold = 100
-
-    # Test the module logic
-
-    logic = AblationPlannerLogic()
-
-    # Test algorithm with non-inverted threshold
-    logic.process(inputVolume, outputVolume, threshold, True)
-    outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-    self.assertEqual(outputScalarRange[1], threshold)
-
-    # Test algorithm with inverted threshold
-    logic.process(inputVolume, outputVolume, threshold, False)
-    outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-    self.assertEqual(outputScalarRange[1], inputScalarRange[1])
 
     self.delayDisplay('Test passed')
