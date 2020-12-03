@@ -36,13 +36,16 @@ Steps 1-7 of the ablation planning workflow are completed before the day of the 
 12. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. Ablation margin information is provided via the a 3D voronoi model (which displays a heatmap based on distance between the tumor and the ablation profile), a printed minimum margin (via the python command line interface), and an output table called "surface_distances" (that contains a variety of data extracted from the 3D voronoi model). The "Absolute" column contains information about the absolute distance between the two models should these be of interest. 
 
 Disclaimer
+
 SlicerAblationPlanner, same as 3D Slicer, is a research software. SlicerAblationPlanner is NOT an FDA-approved medical device. It is not intended for clinical use. The user assumes full responsibility to comply with the appropriate regulations.
 
 Support
+
 Please feel free to contact me for questions, feedback, suggestions or bugs. 
 nathaniel (underscore) rex@ brown.edu
 
 Acknowledgments
+
 Development of SlicerAblationPlanner was supported in part by the following NIH grants:
 
 T35 HL094308 NIH National Heart, Lung, Blood Institute (NHLBI) Training Grant
