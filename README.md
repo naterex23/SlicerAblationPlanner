@@ -40,7 +40,7 @@ SlicerAblationPlanner, same as 3D Slicer, is a research software. SlicerAblation
 
 Support
 Please feel free to contact me for questions, feedback, suggestions or bugs. 
-nathaniel rex@brown.edu
+nathaniel (underscore) rex@ brown.edu
 
 Acknowledgments
 Development of SlicerAblationPlanner was supported in part by the following NIH grants:
