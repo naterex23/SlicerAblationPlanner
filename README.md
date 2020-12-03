@@ -37,6 +37,7 @@ All of the steps of the ablation planning workflow are completed before the day 
 
 Acknowledgments
 Development of SlicerAblationPlanner was supported in part by the following NIH grants:
+
 T35 HL094308 NIH National Heart, Lung, Blood Institute (NHLBI) Training Grant
 
 A library of common ablation profiles can be found at: https://github.com/naterex23/SlicerAblationPlannerProfiles
