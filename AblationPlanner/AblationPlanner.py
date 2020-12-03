@@ -65,7 +65,7 @@ def registerSampleData():
     uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
     fileNames='AblationPlanner1.nrrd',
     # Checksum to ensure file integrity. Can be computed by this command:
-    #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
+    # import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
     checksums = 'SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95',
     # This node name will be used when the data set is loaded
     nodeNames='AblationPlanner1'
@@ -276,29 +276,21 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
      self.logic.updateNodeColor(tumorNode)
 
 
-
-
-
   def onMarginButton(self):
     self.updateParameterNodeFromGUI()
 
     tumorNode = self._parameterNode.GetNodeReference("InputTumor")
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
 
-    print("You clicked the margin button!")
     outputMarginModel, resultTableNode, lowerMargin = self.logic.evaluateMargins(tumorNode, probeNode)
     
     thisDisplayNode = tumorNode.GetDisplayNode()
     thisDisplayNode.SetVisibility(False) # Hide all points
 
-    #self._parameterNode.SetParameter("originalModelFieldArray", VTKDataArray)
     self._parameterNode.SetNodeReferenceID("outputMarginModel", outputMarginModel.GetID())
-    #self._parameterNode.SetParameter("originalModelFieldData", VTKFieldData) #set original colors
     self._parameterNode.SetNodeReferenceID("resultTableNodeID", resultTableNode.GetID())
-    #self._parameterNode.SetNodeReferenceID()
     VTKFieldData = outputMarginModel.GetMesh().GetAttributesAsFieldData(0)
     VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
-
     originalColorArray = []
 
     for i in range(0, VTKFieldDataArray.GetSize()-1):
@@ -307,11 +299,9 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         thisArray.append(i)
         originalColorArray.append(thisArray)
 
-
     self.originalColorArray = originalColorArray
     self.originalModelFieldData = VTKFieldData
     self.lowerMargin = lowerMargin
-
 
 
   def onColorButton(self):
@@ -327,9 +317,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.logic.regenerateOriginalModelColors(outputMarginModel, self.originalColorArray)
     self.logic.updateNodeColor(outputMarginModel)
 
-
   def onApplyButton(self):
-     print("You clicked the apply button!")
      self._parameterNode.SetParameter("dummy_parameter","dummy_parameter_value")
      print(self._parameterNode)
 
@@ -351,10 +339,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.updateParameterNodeFromGUI()
 
     endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
-    #print("Found endPointsMarkupsNode of length: ", num_fiducials)
-
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
-    #print("Found probe: ", probeNode)
 
     self.logic.process(endPointsMarkupsNode, probeNode)
     
@@ -397,19 +382,16 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         return
 
     fidCount = fiducialNode.GetNumberOfFiducials()
-    print("Number of fiducials entered: ", fidCount)
 
     defaultPosition = [0,0,-1]
     xyz = [0,0,0]
     coordList = []
     
-
     if (fidCount%2 == 1):
-        print("You entered an odd number of fiducials!")
+        print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
     else:
         fidPairs = fidCount/2 
         nodeIds = duplicateProbeNode(int(fidPairs),probeNode)
-        #print(nodeIds)
         
         for i in range(0, fidCount):
             xyz = [0,0,0]
@@ -426,8 +408,6 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         xyz1s.append(xyz1)
         xyz2 = coordList[i+1]
 
-        #print("Calculating distance & vector for: ", xyz1, xyz2)
-
         fiducialDistance = (((abs(xyz2[0]-xyz1[0])) ** 2) + (abs(xyz2[1]-xyz1[1]) ** 2) + (abs(xyz2[2]-xyz1[2]) ** 2)) ** 0.5
         vector = [xyz2[0]-xyz1[0], xyz2[1]-xyz1[1], xyz2[2]- xyz1[2]]
         unitVector = [vector[0]/fiducialDistance, vector[1]/fiducialDistance, vector[2]/fiducialDistance]
@@ -436,14 +416,13 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         fidVector.append(vector)
         fidUnitVector.append(unitVector)
         
-        slicer.app.processEvents()  # force update
+        slicer.app.processEvents()
 
         rigidRegistrationMatrix = rotationMatrixFromVectors(defaultPosition, unitVector)
         thisScene = probeNode.GetScene()
         probeReference = thisScene.GetNodeByID(nodeIds[int(i/2)])
 
         slicer.app.processEvents()  # force update
-
         applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz1)
 
     convertSegmentsToSegment(probeNode, nodeIds)
@@ -454,14 +433,11 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     modelNode2 = convertSegmentToModel(probeNode)
     outputNode = findModelToModelDistance(modelNode1,modelNode2)
     VTKFieldData = outputNode.GetMesh().GetAttributesAsFieldData(0)
-    #print("Number of arrays available in VTKFieldData: ", VTKFieldData.GetNumberOfArrays())
-    #print("Number of tuples in VTKFieldData", VTKFieldData.GetNumberOfTuples())
 
     resultTableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "surface_distances")
     
     for j in range(0,VTKFieldData.GetNumberOfArrays()):
         resultTableNode.AddColumn(VTKFieldData.GetArray(j))
-
 
     tumorDisplayNode = tumorNode.GetDisplayNode()
     tumorDisplayNode.SetOpacity(0.2)
@@ -469,7 +445,6 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     tumorDisplayNode.SetOpacity(0.2)
     thisDisplayNode = modelNode2.GetDisplayNode()
     thisDisplayNode.SetOpacity(0.2) # Hide all points
-    
 
     distanceRange = VTKFieldData.GetArray("Absolute").GetRange()
     print("Evaluated model to model distance, found range: ", distanceRange)
@@ -478,22 +453,17 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
 
   def updateNodeColor(self, node):
-    #thisNode = slicer.util.getNode(node)
     thisDisplayNode = node.GetDisplayNode()
     thisDisplayNode.SetVisibility(False) # Hide all points
     thisDisplayNode.SetVisibility(True)
-  
 
   def changeColorsByMargin(self, modelNode, low, med, high):
 
     VTKFieldData = modelNode.GetMesh().GetAttributesAsFieldData(0)
-
     VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
 
-    print("Size of entered array: ", VTKFieldDataArray.GetSize())
     for i in range(0,VTKFieldDataArray.GetSize()-1):
         colorval = VTKFieldDataArray.GetValue(i)
-        #print(this_colorval)
         if (colorval < low):
             VTKFieldDataArray.SetValue(i,low)
         elif (colorval < med):
@@ -526,24 +496,19 @@ def convertSegmentsToSegment(probeNode, nodeIds):
     slicer.app.processEvents() 
 
     for probeNodeID in nodeIds:
-        #print("Processing copy of: ", probeNodeID)
         duplicateProbeNode = thisScene.GetNodeByID(probeNodeID)
         segmentType = duplicateProbeNode.GetSegmentation().GetMasterRepresentationName()
         slicer.app.processEvents() 
         if (segmentType == "Closed surface"):
-            #print("Found a closed surface! ", probeNodeID)
             mergedImage = vtk.vtkPolyData()
             duplicateProbeNode.GetClosedSurfaceRepresentation(duplicateProbeNode.GetSegmentation().GetNthSegmentID(0), mergedImage)
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,probeNodeID,[0,1,0])
         else:
-            #print("Found a Binary labelmap! ", probeNodeID)
             labelmapImage = vtkSegmentationCore.vtkOrientedImageData()
             duplicateProbeNode.GetBinaryLabelmapRepresentation(duplicateProbeNode.GetSegmentation().GetNthSegmentID(0),labelmapImage)
             segmentationNode.AddSegmentFromBinaryLabelmapRepresentation(labelmapImage,probeNodeID,[1,0,0])
         
         slicer.mrmlScene.RemoveNode(duplicateProbeNode)
-
-    print("Number of segments found to add: ", segmentationNode.GetSegmentation().GetNumberOfSegments())
 
     segmentEditorWidget = slicer.qMRMLSegmentEditorWidget()
     segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
@@ -556,8 +521,6 @@ def convertSegmentsToSegment(probeNode, nodeIds):
         effect = segmentEditorWidget.activeEffect()
         effect.self().scriptedEffect.setParameter("Operation","UNION")
         effect.self().scriptedEffect.setParameter("ModifierSegmentID",segmentationNode.GetSegmentation().GetNthSegmentID(i))
-        print("Found Nth segmentID: ", segmentationNode.GetSegmentation().GetNthSegmentID(i))
-        print(effect.self().modifierSegmentID())
         effect.self().onApply()
         #segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(i))
 
@@ -588,7 +551,7 @@ def applyTransformToProbe(rm, probeNode, xyz1):
     slicer.app.processEvents()  
     time.sleep(0.5)
     probeNode.SetAndObserveTransformNodeID(transformNode.GetID())
-    slicer.app.processEvents()  # force update
+    slicer.app.processEvents()  #harden transform would often cause slicer to crash before slowing the program down. 
     time.sleep(0.5)
     probeNode.HardenTransform()
     time.sleep(0.5)
@@ -610,34 +573,24 @@ def rotationMatrixFromVectors(vec1, vec2):
     return rotationMatrix
 
 def duplicateProbeNode(fidPairs, probeNode):
-    print("Duplicating Probes!")
-
     numDuplicates = int(fidPairs - 1)
     nodeIds = []
     nodeIds.append(probeNode.GetID())
     if (numDuplicates > 0):
         for i in range(0,numDuplicates):
             
-            #labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode')
-            #slicer.modules.segmentations.logic().ExportAllSegmentsToLabelmapNode(probeNode, labelmapVolumeNode, slicer.vtkSegmentation.EXTENT_REFERENCE_GEOMETRY)
-            #seg = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode')
-            
             mergedImage = vtk.vtkPolyData()
             probeNode.GetClosedSurfaceRepresentation(probeNode.GetSegmentation().GetNthSegmentID(0), mergedImage)
             
             segmentationNode = slicer.vtkMRMLSegmentationNode()
-            #segmentationNode.SetMasterRepresentationToClosedSurface()
             slicer.mrmlScene.AddNode(segmentationNode)
             
-            slicer.app.processEvents()  # force update
-            print("Print Location 1!")
+            slicer.app.processEvents()  #force update as occasionally the follow steps cause slicer to crash
             time.sleep(0.5)
 
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
-            print(segmentationNode.GetSegmentation().GetMasterRepresentationName())
             segmentationNode.GetSegmentation().CreateRepresentation("Closed surface")
-            #segmentationNode.GetSegmentation().SetMasterRepresentationName("Closed surface")
             segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
 
             segDisplayNode = probeNode.GetDisplayNode()
@@ -645,22 +598,14 @@ def duplicateProbeNode(fidPairs, probeNode):
             segDisplayNode = segmentationNode.GetDisplayNode()
             segDisplayNode.SetOpacity(0.1)
 
-            slicer.app.processEvents()  # force update
-            #print("Print Location 2!")
+            slicer.app.processEvents() 
             time.sleep(0.5)
-            #slicer.app.processEvents()  # force update
-            #time.sleep(1)
-
-            #slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
-            #seg.CreateClosedSurfaceRepresentation()
 
             nodeIds.append(segmentationNode.GetID())
 
     probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
     probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
     return nodeIds
-
-
 
 
 def convertSegmentToModel(segmentNode):
