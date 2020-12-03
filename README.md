@@ -1,12 +1,8 @@
 # SlicerAblationPlanner
 
-Ablation Planner
-
 This is an extension for 3D Slicer that is used to plan and evaluate ablation zones. 
 
-This module was developed to address research and clinical decision support at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University), with the support of -----
-
-This module was designed to assist in both planning and intra-procedural decision making of ablations in the liver, kidney, and lung. 
+This module was developed to address research and clinical decision support involving kidney, liver, and lung ablations at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University) with the support of Scott Collins (Rhode Island Hospital). 
 
 Ablation Planning Workflow:
 
@@ -37,6 +33,6 @@ All of the steps of the ablation planning workflow are completed before the day 
 9. The operator places at minimum 2 sets of corresponding fiducials, at least 3 in "native" space and 3 in "new" space. Fiducials should be as close to the lesion as possible while maintaining their relative relationship. An example of 3 points for a RCC ablation might include the apex and the nadir of the kidney, as well as a solid bony landmark like a spinus process. 
 10. The extension uses fiducial registration to translate the tumor from "native" space to "new" space. Fiducial registration is optomized to minimize the distance between the fiducial sets, but is not perfect; any additional adjustments to lesion location can be made using the transform tool.
 11. Simulatenously to these steps, the ablation has proceeded and the probes are placed in the patient. The most recent CT (with probe placement is uploaded and the ablation planning workflow is repeated with the observed probe locations. 
-12. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. 
+12. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. Ablation margin information is provided via the a 3D voronoi model, which displays a heatmap based on distance between the tumor and the ablation profile, a printed minimum margin via the python command line interface, and an output table called "surface_distances" that contains a variety of data extracted from the 3D voronoi model. The "Absolute" column contains information about the absolute distance between the two models should these be of research interest. 
 
-A library of ablation profiles for common manufacturers will be uploaded shortly. 
+A library of common ablation profiles can be found at: 
