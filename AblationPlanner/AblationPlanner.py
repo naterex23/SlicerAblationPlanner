@@ -495,8 +495,8 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
   def convertSegmentsToSegment(self, probeNode, nodeIds):
     thisScene = probeNode.GetScene()
     
-    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap") #added 2/22
-    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #added 2/22
+    #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap") #added 2/22
+    #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #added 2/22
 
 
     if len(nodeIds)>0:
@@ -510,7 +510,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
     for probeNodeID in nodeIds:
         duplicateProbeNode = thisScene.GetNodeByID(probeNodeID)
-        duplicateProbeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #ADDED 2/22
+        #duplicateProbeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #ADDED 2/22
         segmentType = duplicateProbeNode.GetSegmentation().GetMasterRepresentationName()
         slicer.app.processEvents() 
         if (segmentType == "Closed surface"):
@@ -612,20 +612,20 @@ def duplicateProbeNode(fidPairs, probeNode):
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
             segmentationNode.GetSegmentation().CreateRepresentation("Closed surface")
-            #segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+            segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
 
             segDisplayNode = probeNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.3)
+            segDisplayNode.SetOpacity(0.1)
             segDisplayNode = segmentationNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.3)
+            segDisplayNode.SetOpacity(0.1)
 
             slicer.app.processEvents() 
             time.sleep(0.5)
 
             nodeIds.append(segmentationNode.GetID())
 
-    #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
-    #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
+    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
     return nodeIds
 
 
