@@ -119,7 +119,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     #COMMENTED OUT
 
      
-	#self._addInputVolumeSection()
+  #self._addInputVolumeSection()
 
 
     # Create logic class. Logic implements all computations that should be possible to run
@@ -136,7 +136,8 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # (in the selected parameter node).
   
     # Buttons
-    self.ui.applyButton.connect('clicked(bool)', self.onApplyButton) 
+    self.ui.PushButton_7.connect('clicked(bool)', self.onHardenButton) 
+    self.ui.PushButton_6.connect('clicked(bool)', self.onTranslateButton) 
     self.ui.PushButton.connect('clicked(bool)', self.onProbeButton)
     self.ui.PushButton_2.connect('clicked(bool)', self.onTumorButton)
     self.ui.PushButton_3.connect('clicked(bool)', self.onMarginButton)
@@ -272,8 +273,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
      FRcliNode = slicer.cli.runSync(slicer.modules.fiducialregistration, None, parameters)
 
      tumorNode.SetAndObserveTransformNodeID(nativeTableTransform.GetID())
-     tumorNode.HardenTransform()
-     self.logic.updateNodeColor(tumorNode)
+     
 
 
   def onMarginButton(self):
@@ -317,10 +317,17 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.logic.regenerateOriginalModelColors(outputMarginModel, self.originalColorArray)
     self.logic.updateNodeColor(outputMarginModel)
 
-  def onApplyButton(self):
-     self._parameterNode.SetParameter("dummy_parameter","dummy_parameter_value")
-     print(self._parameterNode)
+  def onTranslateButton(self):
+    probeNode = self._parameterNode.GetNodeReference("InputSurface")
+    nodeIds = self.nodeIds
+    self.logic.convertSegmentsToSegment(probeNode, nodeIds)
+     
 
+  def onHardenButton(self):
+     tumorNode = self._parameterNode.GetNodeReference("InputTumor")
+     tumorNode.HardenTransform()
+     self.logic.updateNodeColor(tumorNode)
+     
 
   def onProbeButton(self):
     self.updateParameterNodeFromGUI()
@@ -341,11 +348,12 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
 
-    self.logic.process(endPointsMarkupsNode, probeNode)
+    self.nodeIds = self.logic.process(endPointsMarkupsNode, probeNode)
+
     
 
 
-	
+  
 
 
 
@@ -424,8 +432,9 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
         slicer.app.processEvents()  # force update
         applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz1)
+    return nodeIds
 
-    convertSegmentsToSegment(probeNode, nodeIds)
+    #convertSegmentsToSegment(probeNode, nodeIds)
 
 
   def evaluateMargins(self, probeNode, tumorNode):
@@ -483,8 +492,12 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
 
         
-def convertSegmentsToSegment(probeNode, nodeIds):
+  def convertSegmentsToSegment(self, probeNode, nodeIds):
     thisScene = probeNode.GetScene()
+    
+    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap") #added 2/22
+    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #added 2/22
+
 
     if len(nodeIds)>0:
         print("Found multiple probe nodes, combining them into a single segment!: ", nodeIds)
@@ -497,6 +510,7 @@ def convertSegmentsToSegment(probeNode, nodeIds):
 
     for probeNodeID in nodeIds:
         duplicateProbeNode = thisScene.GetNodeByID(probeNodeID)
+        duplicateProbeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #ADDED 2/22
         segmentType = duplicateProbeNode.GetSegmentation().GetMasterRepresentationName()
         slicer.app.processEvents() 
         if (segmentType == "Closed surface"):
@@ -507,8 +521,10 @@ def convertSegmentsToSegment(probeNode, nodeIds):
             labelmapImage = vtkSegmentationCore.vtkOrientedImageData()
             duplicateProbeNode.GetBinaryLabelmapRepresentation(duplicateProbeNode.GetSegmentation().GetNthSegmentID(0),labelmapImage)
             segmentationNode.AddSegmentFromBinaryLabelmapRepresentation(labelmapImage,probeNodeID,[1,0,0])
-        
-        slicer.mrmlScene.RemoveNode(duplicateProbeNode)
+            duplicateProbeNode.GetSegmentation().CreateRepresentation("Closed Surface")
+            #segmentationNode.GetSegmentation().CreateRepresentation("Closed surface")
+            #segmentationNode.GetSegmentation().SetMasterRepresentationName("Closed surface")
+        #slicer.mrmlScene.RemoveNode(duplicateProbeNode)
 
     segmentEditorWidget = slicer.qMRMLSegmentEditorWidget()
     segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
@@ -516,7 +532,8 @@ def convertSegmentsToSegment(probeNode, nodeIds):
     segmentEditorWidget.setMRMLSegmentEditorNode(segmentEditorNode)
     segmentEditorWidget.setSegmentationNode(segmentationNode)
 
-    for i in range(1, segmentationNode.GetSegmentation().GetNumberOfSegments()):  #TWO ADDITIONAL PROBES
+
+    for i in range(1, segmentationNode.GetSegmentation().GetNumberOfSegments()+1):  #TWO ADDITIONAL PROBES
         segmentEditorWidget.setActiveEffectByName("Logical operators")
         effect = segmentEditorWidget.activeEffect()
         effect.self().scriptedEffect.setParameter("Operation","UNION")
@@ -524,15 +541,19 @@ def convertSegmentsToSegment(probeNode, nodeIds):
         effect.self().onApply()
         #segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(i))
 
-    for i in range(1, segmentationNode.GetSegmentation().GetNumberOfSegments()):  #TWO ADDITIONAL PROBES
-        segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(i))
+    #for i in range(1, segmentationNode.GetSegmentation().GetNumberOfSegments()):  #TWO ADDITIONAL PROBES
+    #    segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(i))
 
     segDisplayNode = segmentationNode.GetDisplayNode()
     segDisplayNode.SetOpacity(0.3)
 
     segmentationNode.GetSegmentation().CreateRepresentation("Closed surface")
     segmentationNode.GetSegmentation().SetMasterRepresentationName("Closed surface")
-    segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
+    
+    segNum = segmentationNode.GetSegmentation().GetNumberOfSegments()
+    for i in range(0,segNum):
+      segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
+
 
 
     
@@ -591,20 +612,20 @@ def duplicateProbeNode(fidPairs, probeNode):
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
             segmentationNode.GetSegmentation().CreateRepresentation("Closed surface")
-            segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+            #segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
 
             segDisplayNode = probeNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
             segDisplayNode = segmentationNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
 
             slicer.app.processEvents() 
             time.sleep(0.5)
 
             nodeIds.append(segmentationNode.GetID())
 
-    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
-    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+    #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
+    #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
     return nodeIds
 
 
