@@ -280,7 +280,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.updateParameterNodeFromGUI()
 
     tumorNode = self._parameterNode.GetNodeReference("InputTumor")
-    probeNode = self._parameterNode.GetNodeReference("InputSurface")
+    probeNode = self._parameterNode.GetNodeReference("combinedProbeNode")
 
     outputMarginModel, resultTableNode, lowerMargin = self.logic.evaluateMargins(tumorNode, probeNode)
     
@@ -320,7 +320,8 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
   def onTranslateButton(self):
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
     nodeIds = self.nodeIds
-    self.logic.convertSegmentsToSegment(probeNode, nodeIds)
+    combinedProbeNode = self.logic.convertSegmentsToSegment(probeNode, nodeIds)
+    self._parameterNode.SetNodeReferenceID("combinedProbeNode", combinedProbeNode.GetID())
      
 
   def onHardenButton(self):
@@ -553,6 +554,8 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     segNum = segmentationNode.GetSegmentation().GetNumberOfSegments()
     for i in range(0,segNum):
       segmentationNode.GetSegmentation().RemoveSegment(segmentationNode.GetSegmentation().GetNthSegmentID(1))
+
+    return segmentationNode
 
 
 
