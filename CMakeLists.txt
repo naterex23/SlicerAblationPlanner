@@ -7,7 +7,7 @@ project(AblationPlanner)
 set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/AblationPlanner")
 set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Nathaniel Rex (Brown University), Scott Collins (Rhode Island Hospital)")
-set(EXTENSION_DESCRIPTION "This extension enables the user to place virtual ablation profiles and evaluate a theoretical margins associated with these profiles.  ")
+set(EXTENSION_DESCRIPTION "This extension enables the user to place virtual ablation profiles and evaluate a theoretical margin associated with these profiles.  ")
 set(EXTENSION_ICONURL "https://github.com/naterex23/SlicerAblationPlanner/raw/main/AblationPlanner/Resources/Icons/AblationPlanner.png")
 set(EXTENSION_SCREENSHOTURLS "https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/combined_probes.png, https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/fiducial_placement.png, https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/margin_colors.png")
 set(EXTENSION_DEPENDS "ModelToModelDistance") # Specified as a list or "NA" if no dependencies

@@ -290,7 +290,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetNodeReferenceID("outputMarginModel", outputMarginModel.GetID())
     self._parameterNode.SetNodeReferenceID("resultTableNodeID", resultTableNode.GetID())
     VTKFieldData = outputMarginModel.GetMesh().GetAttributesAsFieldData(0)
-    VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
+    VTKFieldDataArray = VTKFieldData.GetArray("Signed")
     originalColorArray = []
 
     for i in range(0, VTKFieldDataArray.GetSize()-1):
@@ -450,13 +450,16 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         resultTableNode.AddColumn(VTKFieldData.GetArray(j))
 
     tumorDisplayNode = tumorNode.GetDisplayNode()
+    #tumorDisplayNode.SetVisibility(False) # Hide all points
     tumorDisplayNode.SetOpacity(0.2)
     probeDisplayNode = probeNode.GetDisplayNode()
-    tumorDisplayNode.SetOpacity(0.2)
+    #probeDisplayNode.SetVisibility(False)
+    probeDisplayNode.SetOpacity(0.2)
     thisDisplayNode = modelNode2.GetDisplayNode()
-    thisDisplayNode.SetOpacity(0.2) # Hide all points
+    #thisDisplayNode.SetVisibility(False)
+    #thisDisplayNode.SetOpacity(0.2) # Hide all points
 
-    distanceRange = VTKFieldData.GetArray("Absolute").GetRange()
+    distanceRange = VTKFieldData.GetArray("Signed").GetRange()
     print("Evaluated model to model distance, found range: ", distanceRange)
 
     return outputNode, resultTableNode, distanceRange[0] #, array
@@ -470,7 +473,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
   def changeColorsByMargin(self, modelNode, low, med, high):
 
     VTKFieldData = modelNode.GetMesh().GetAttributesAsFieldData(0)
-    VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
+    VTKFieldDataArray = VTKFieldData.GetArray("Signed")
 
     for i in range(0,VTKFieldDataArray.GetSize()-1):
         colorval = VTKFieldDataArray.GetValue(i)
@@ -484,7 +487,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
   def regenerateOriginalModelColors(self, modelNode, originalColorArray):
 
     VTKFieldData = modelNode.GetMesh().GetAttributesAsFieldData(0)
-    VTKFieldDataArray = VTKFieldData.GetArray("Absolute")
+    VTKFieldDataArray = VTKFieldData.GetArray("Signed")
 
     for i in range(0, len(originalColorArray)-1):
         loopArray = originalColorArray[i]
@@ -650,7 +653,7 @@ def findModelToModelDistance(modelNode1,modelNode2):
     parameters = {}
     parameters["vtkFile1"] = modelNode2
     parameters["vtkFile2"] = modelNode1
-    parameters['distanceType'] = "absolute_closest_point"
+    parameters['distanceType'] = "signed_closest_point"
     parameters["vtkOutput"] = vtkOutput
 
     cliNode = slicer.cli.runSync(slicer.modules.modeltomodeldistance, None, parameters)
