@@ -277,31 +277,35 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
 
   def onMarginButton(self):
-    self.updateParameterNodeFromGUI()
+    try: 
+      self.updateParameterNodeFromGUI()
 
-    tumorNode = self._parameterNode.GetNodeReference("InputTumor")
-    probeNode = self._parameterNode.GetNodeReference("combinedProbeNode")
+      tumorNode = self._parameterNode.GetNodeReference("InputTumor")
+      probeNode = self._parameterNode.GetNodeReference("combinedProbeNode")
 
-    outputMarginModel, resultTableNode, lowerMargin = self.logic.evaluateMargins(tumorNode, probeNode)
-    
-    thisDisplayNode = tumorNode.GetDisplayNode()
-    thisDisplayNode.SetVisibility(False) # Hide all points
+      outputMarginModel, resultTableNode, lowerMargin, signedVals = self.logic.evaluateMargins(tumorNode, probeNode)
+      
+      thisDisplayNode = tumorNode.GetDisplayNode()
+      thisDisplayNode.SetVisibility(False) # Hide all points
 
-    self._parameterNode.SetNodeReferenceID("outputMarginModel", outputMarginModel.GetID())
-    self._parameterNode.SetNodeReferenceID("resultTableNodeID", resultTableNode.GetID())
-    VTKFieldData = outputMarginModel.GetMesh().GetAttributesAsFieldData(0)
-    VTKFieldDataArray = VTKFieldData.GetArray("Signed")
-    originalColorArray = []
+      self._parameterNode.SetNodeReferenceID("outputMarginModel", outputMarginModel.GetID())
+      self._parameterNode.SetNodeReferenceID("resultTableNodeID", resultTableNode.GetID())
+      VTKFieldData = outputMarginModel.GetMesh().GetAttributesAsFieldData(0)
+      VTKFieldDataArray = VTKFieldData.GetArray("Signed")
+      originalColorArray = []
 
-    for i in range(0, VTKFieldDataArray.GetSize()-1):
-        thisArray = []
-        thisArray.append(VTKFieldDataArray.GetValue(i))
-        thisArray.append(i)
-        originalColorArray.append(thisArray)
+      for i in range(0, VTKFieldDataArray.GetSize()-1):
+          thisArray = []
+          thisArray.append(VTKFieldDataArray.GetValue(i))
+          thisArray.append(i)
+          originalColorArray.append(thisArray)
 
-    self.originalColorArray = originalColorArray
-    self.originalModelFieldData = VTKFieldData
-    self.lowerMargin = lowerMargin
+      self.originalColorArray = originalColorArray
+      self.originalModelFieldData = VTKFieldData
+      self.lowerMargin = lowerMargin
+      self.signedVals = signedVals
+    except Exception as e:
+      slicer.util.errorDisplay("Did you enter a segmentation? The code found an error: "+str(e))
 
 
   def onColorButton(self):
@@ -460,9 +464,16 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     #thisDisplayNode.SetOpacity(0.2) # Hide all points
 
     distanceRange = VTKFieldData.GetArray("Signed").GetRange()
-    print("Evaluated model to model distance, found range: ", distanceRange)
+    signedVals = []
+    for i in range(0,VTKFieldData.GetArray('Signed').GetSize()-1):
+        signedVals.append(VTKFieldData.GetArray('Signed').GetValue(i)) #value
 
-    return outputNode, resultTableNode, distanceRange[0] #, array
+    print("Evaluated model to model distance, found range: ", distanceRange)
+    print("Mean: ", np.mean(signedVals))
+    print("Median: ", np.median(signedVals))
+    print("10th percentile: ", np.quantile(signedVals, 0.1))
+
+    return outputNode, resultTableNode, distanceRange[0], signedVals #, array
 
 
   def updateNodeColor(self, node):
