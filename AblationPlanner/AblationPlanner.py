@@ -123,7 +123,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
 
     # Create logic class. Logic implements all computations that should be possible to run
-    # in batch mode, without a graphical user interface.
+    # in batch mode, without a graphical user interface. 
     self.logic = AblationPlannerLogic()
 
     # Connections
@@ -461,7 +461,6 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     probeDisplayNode.SetOpacity(0.2)
     thisDisplayNode = modelNode2.GetDisplayNode()
     #thisDisplayNode.SetVisibility(False)
-    #thisDisplayNode.SetOpacity(0.2) # Hide all points
 
     distanceRange = VTKFieldData.GetArray("Signed").GetRange()
     signedVals = []
@@ -471,7 +470,8 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     print("Evaluated model to model distance, found range: ", distanceRange)
     print("Mean: ", np.mean(signedVals))
     print("Median: ", np.median(signedVals))
-    print("10th percentile: ", np.quantile(signedVals, 0.1))
+    print("80th percentile: ", np.quantile(signedVals, 0.8))
+    print("20th percentile: ", np.quantile(signedVals, 0.2))
 
     return outputNode, resultTableNode, distanceRange[0], signedVals #, array
 
@@ -571,9 +571,6 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
     return segmentationNode
 
-
-
-    
 
 def applyTransformToProbe(rm, probeNode, xyz1):
     transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode")
