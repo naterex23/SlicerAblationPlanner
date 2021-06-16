@@ -38,7 +38,7 @@ status
 This extension enables the user to place virtual ablation profiles and evaluate a theoretical procedural ablation margin associated with these profiles.  
 
 # Space separated list of urls
-screenshoturls https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/combined_probes.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/fiducial_placement.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/margin_colors.png
+screenshoturls https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/minimum_required_inputs.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/minimum_required_placement.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/ablation_steps.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/ablation_outputs.png https://github.com/naterex23/SlicerAblationPlanner/raw/main/Screenshots/margin_colors.png
 
 # 0 or 1: Define if the extension should be enabled after its installation.
 enabled 1
