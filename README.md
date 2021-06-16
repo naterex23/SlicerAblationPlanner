@@ -8,8 +8,11 @@ Ablation Planning Workflow:
 
 1. A pre-procedure CT of the thorax/abdomen is obtained, in which a lesion to be ablated is identified. 
 2. The lesion is manually segmented in it's native coordinate system ("pre-procedure" or "native" space) using the SegmentEditor tool. 
-3. The operator imports the appropriate ablation profile for hardware available at the institution. A library of common ablation profiles can be found at: https://github.com/naterex23/SlicerAblationPlannerProfiles
-4. The operator places fiducials to plant probes in an appropriate orientation to cover the lesion. Note that "odd" fiducials (1,3,5..) correspond to the tip of the probe and that "even" fiducials (2,4,6...) correspond to the approximate position at which the probe enters the body and therefore should be placed on the "patients skin" (see below). After placing all desired fiducials the "Place Probes" button should be pushed. 
+
+![minimum_required_inputs](/Screenshots/minimum_required_inputs.png)
+
+4. The operator imports the appropriate ablation profile for hardware available at the institution. A library of common ablation profiles can be found at: https://github.com/naterex23/SlicerAblationPlannerProfiles
+5. The operator places fiducials to plant probes in an appropriate orientation to cover the lesion. Note that "odd" fiducials (1,3,5..) correspond to the tip of the probe and that "even" fiducials (2,4,6...) correspond to the approximate position at which the probe enters the body and therefore should be placed on the "patients skin" (see below). After placing all desired fiducials the "Place Probes" button should be pushed. 
 
 ![fiducial_placement](/Screenshots/fiducial_placement.png)
 
