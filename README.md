@@ -20,15 +20,15 @@ Ablation Planning Workflow:
 3. The operator imports the appropriate ablation profile for hardware available at the institution. A library of common ablation profiles can be found at: https://github.com/naterex23/SlicerAblationPlannerProfiles
 4. The operator places fiducials to plant probes in an appropriate orientation to cover the lesion. Note that "odd" fiducials (1,3,5..) correspond to the tip of the probe and that "even" fiducials (2,4,6...) correspond to the approximate position at which the probe enters the body and therefore should be placed on the "patients skin" (see image below). After placing all desired fiducials the "Place Probes" button should be pushed. 
 
-![minimum_required_placement](/Screenshots/minimum_required_placement.png)
+![minimum_required_placement](/Screenshots/minimum_required_placement.PNG)
 
 5. After the "Place Probes" button is hit, the placement of the probes should be evaluated. The probe segments have not yet been fused and therefore can be independently adjusted using the transform module. Alternatively one could start the process over again if the probe placement is not optimal. Next the "Translate Probe" button can be pressed. This step merges the segments and creates a unified ablation profile. 
 
-![ablation_steps](/Screenshots/ablation_steps.png)
+![ablation_steps](/Screenshots/ablation_steps.PNG)
 
 6. After the unified ablation profile has been evaluated and is satisfactory the "Evaluate Tumor Margins" button can be clicked. This operation generates numerous output files and should take approximately 2-5 minutes to run based on computer speed and number of probes used. The output should look something like the screenshot below. 
 
-![ablation_outputs](/Screenshots/ablation_outputs.png)
+![ablation_outputs](/Screenshots/ablation_outputs.PNG)
 
 7. A variety of useful information including the minimum margin is available in the python interactor. If desired the "Apply Margin Color" can be pressed to create an output as below. The "Revert Color" button can be pressed to return to the original model colors. 
 
