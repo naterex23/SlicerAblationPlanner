@@ -151,6 +151,8 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         nodeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     # Make sure parameter node is initialized (needed for module reload)
     #self.initializeParameterNode()
+    self.endPoints_positions = []
+    self.fromDrag = False
     self.updateGUIFromParameterNode()
 
 
@@ -283,6 +285,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       tumorNode = self._parameterNode.GetNodeReference("InputTumor")
       probeNode = self._parameterNode.GetNodeReference("combinedProbeNode")
 
+
       outputMarginModel, resultTableNode, lowerMargin, signedVals = self.logic.evaluateMargins(tumorNode, probeNode)
       
       thisDisplayNode = tumorNode.GetDisplayNode()
@@ -311,7 +314,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
   def onColorButton(self):
     self.updateParameterNodeFromGUI()
     outputMarginModel = self._parameterNode.GetNodeReference("outputMarginModel")
-    self.logic.changeColorsByMargin(outputMarginModel,5,10,15)
+    self.logic.changeColorsByMargin(outputMarginModel,-10,-5,-2)
     self.logic.updateNodeColor(outputMarginModel)
 
 
@@ -323,7 +326,14 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
   def onTranslateButton(self):
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
-    nodeIds = self.nodeIds
+
+    thisScene = probeNode.GetScene()
+    markupReference = thisScene.GetNodeByID(self.formerMarkupID)
+    markupReference.RemoveObserver(self.observerID)
+    self.removeObservers()
+
+
+    nodeIds = self.probeNodeIDs
     combinedProbeNode = self.logic.convertSegmentsToSegment(probeNode, nodeIds)
     self._parameterNode.SetNodeReferenceID("combinedProbeNode", combinedProbeNode.GetID())
      
@@ -336,32 +346,64 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
   def onProbeButton(self):
     self.updateParameterNodeFromGUI()
-    try:
-        slicer.util.showStatusMessage("Processing...")
-        slicer.app.processEvents()  # force update
-        #preprocessedPolyData = self.getPreprocessedPolyData()
-        endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
-        if not endPointsMarkupsNode:
-            endPointsMarkupsNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode",
-                slicer.mrmlScene.GetUniqueNameByString("Centerline endpoints"))
-            endPointsMarkupsNode.CreateDefaultDisplayNodes()
-            self._parameterNode.SetNodeReferenceID("EndPoints", endPointsMarkupsNode.GetID())
-    except Exception as e:
-        slicer.util.errorDisplay("Failed to detect end points: "+str(e))
-    self.updateParameterNodeFromGUI()
+    if True:
+      xyz = []
+      endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
+      probeNode = self._parameterNode.GetNodeReference("InputSurface")
+      #print("Found an input probe: ", probeNode)
+      probeDisplayNode = probeNode.GetDisplayNode()
+      probeDisplayNode.SetVisibility(False)
 
-    endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
-    probeNode = self._parameterNode.GetNodeReference("InputSurface")
+      for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
+        xyz.append([0,0,0])
 
-    self.nodeIds = self.logic.process(endPointsMarkupsNode, probeNode)
+      print("Number of input fiducials found: ", endPointsMarkupsNode.GetNumberOfFiducials())
 
-    
+      if endPointsMarkupsNode.GetNumberOfFiducials() > 2:
+        if (endPointsMarkupsNode.GetNumberOfFiducials()%2 == 1):
+          print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
+        else:
+          fidPairs = endPointsMarkupsNode.GetNumberOfFiducials()/2 
+          probeNodeIDs = duplicateProbeNode(int(fidPairs),probeNode)
+      self.probeNodeIDs = probeNodeIDs
+      print("New probe IDs probes: ", self.probeNodeIDs)
+
+      for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
+        endPointsMarkupsNode.GetNthFiducialPosition(i, xyz[i])
+        self.endPoints_positions.append(xyz) #.GetNthFiducialPosition(0, [1,1,1])
+        #print("At positon: ", i, " found position: ", xyz[i])
+        self.endPoints_positions = xyz
+        
+      #self.endPoints_positions = point_list
+      for i in range(0, len(self.probeNodeIDs)):
+        self.logic.updateProbePosition(self.probeNodeIDs[i], probeNode, [0,0,0], [0,0,-1], self.endPoints_positions[i*2], self.endPoints_positions[i*2+1])
+        #logging.info("Moving probe {0} from {1} , {2} to position {3} , {4}".format(self.probeNodeIDs[i], [0,0,0],[0,0,-1], self.endPoints_positions[i*2], self.endPoints_positions[i*2+1]))
+
+      #endPointsMarkupsNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointStartInteractionEvent, self.onMarkupStartInteraction)
+      if self.fromDrag:
+        #endPointsMarkupsNode.removeObservers()
+        thisScene = probeNode.GetScene()
+        markupReference = thisScene.GetNodeByID(self.formerMarkupID)
+        endPointsMarkupsNode.RemoveObserver(self.observerID)
+        self.removeObservers()
+      self.observerID = endPointsMarkupsNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointEndInteractionEvent, self.onMarkupEndInteraction)
+      self.formerMarkupID = endPointsMarkupsNode.GetID()
 
 
-  
 
 
 
+  def onMarkupEndInteraction(self, caller, event):
+    markupsNode = caller
+    self.fromDrag = True
+    thisScene = markupsNode.GetScene()
+    existingMovedProbes = self.probeNodeIDs
+    for probeID in existingMovedProbes:
+      probeReference = thisScene.GetNodeByID(probeID)
+      slicer.mrmlScene.RemoveNode(probeReference)
+      print("Deleted: ", probeID)
+
+    self.onProbeButton()
 
 
 
@@ -387,59 +429,29 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     if not parameterNode:
         print("No parameter node entered!")
 
-  def process(self, fiducialNode, probeNode):
-    print("Processing...")
-    
-    if not fiducialNode:
-        print("Entered fiducial node is null!")
-        return
-
-    fidCount = fiducialNode.GetNumberOfFiducials()
-
-    defaultPosition = [0,0,-1]
-    xyz = [0,0,0]
-    coordList = []
-    
-    if (fidCount%2 == 1):
-        print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
-    else:
-        fidPairs = fidCount/2 
-        nodeIds = duplicateProbeNode(int(fidPairs),probeNode)
-        
-        for i in range(0, fidCount):
-            xyz = [0,0,0]
-            fiducialNode.GetNthFiducialPosition(i, xyz) #.GetNthFiducialPosition(0, [1,1,1])
-            coordList.append(xyz)
-
-    fidDistance = []
-    fidVector = []
-    fidUnitVector = []
-    xyz1s = []
-
-    for i in range(0, fidCount, 2):
-        xyz1 = coordList[i]
-        xyz1s.append(xyz1)
-        xyz2 = coordList[i+1]
-
-        fiducialDistance = (((abs(xyz2[0]-xyz1[0])) ** 2) + (abs(xyz2[1]-xyz1[1]) ** 2) + (abs(xyz2[2]-xyz1[2]) ** 2)) ** 0.5
-        vector = [xyz2[0]-xyz1[0], xyz2[1]-xyz1[1], xyz2[2]- xyz1[2]]
-        unitVector = [vector[0]/fiducialDistance, vector[1]/fiducialDistance, vector[2]/fiducialDistance]
-
-        fidDistance.append(fiducialDistance)
-        fidVector.append(vector)
-        fidUnitVector.append(unitVector)
-        
-        slicer.app.processEvents()
-
-        rigidRegistrationMatrix = rotationMatrixFromVectors(defaultPosition, unitVector)
-        thisScene = probeNode.GetScene()
-        probeReference = thisScene.GetNodeByID(nodeIds[int(i/2)])
-
-        slicer.app.processEvents()  # force update
-        applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz1)
-    return nodeIds
 
     #convertSegmentsToSegment(probeNode, nodeIds)
+  def updateProbePosition(self, probeNodeID, probeNode, xyz1, xyz2, xyz3, xyz4):
+     #print("Updating probe position!")
+     #print(xyz1, " ", xyz2, " ", xyz3, " ", xyz4)
+     
+
+     fiducialDistance1 = (((abs(xyz2[0]-xyz1[0])) ** 2) + (abs(xyz2[1]-xyz1[1]) ** 2) + (abs(xyz2[2]-xyz1[2]) ** 2)) ** 0.5
+     vector1 = [xyz2[0]-xyz1[0], xyz2[1]-xyz1[1], xyz2[2]- xyz1[2]]
+     unitVector1 = [vector1[0]/fiducialDistance1, vector1[1]/fiducialDistance1, vector1[2]/fiducialDistance1]
+
+     fiducialDistance2 = (((abs(xyz4[0]-xyz3[0])) ** 2) + (abs(xyz4[1]-xyz3[1]) ** 2) + (abs(xyz4[2]-xyz3[2]) ** 2)) ** 0.5
+     vector2 = [xyz4[0]-xyz3[0], xyz4[1]-xyz3[1], xyz4[2]- xyz3[2]]
+     unitVector2 = [vector2[0]/fiducialDistance2, vector2[1]/fiducialDistance2, vector2[2]/fiducialDistance2]
+
+     rigidRegistrationMatrix = rotationMatrixFromVectors(unitVector1, unitVector2)
+     slicer.app.processEvents()  # force update
+     
+     thisScene = probeNode.GetScene()
+     probeReference = thisScene.GetNodeByID(probeNodeID)
+
+     applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz3)
+
 
 
   def evaluateMargins(self, probeNode, tumorNode):
@@ -455,12 +467,12 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
     tumorDisplayNode = tumorNode.GetDisplayNode()
     #tumorDisplayNode.SetVisibility(False) # Hide all points
-    tumorDisplayNode.SetOpacity(0.2)
+    tumorDisplayNode.SetOpacity(0.05)
     probeDisplayNode = probeNode.GetDisplayNode()
     #probeDisplayNode.SetVisibility(False)
-    probeDisplayNode.SetOpacity(0.2)
+    probeDisplayNode.SetOpacity(0.05)
     thisDisplayNode = modelNode2.GetDisplayNode()
-    #thisDisplayNode.SetVisibility(False)
+    thisDisplayNode.SetVisibility(False)
 
     distanceRange = VTKFieldData.GetArray("Signed").GetRange()
     signedVals = []
@@ -488,12 +500,12 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
     for i in range(0,VTKFieldDataArray.GetSize()-1):
         colorval = VTKFieldDataArray.GetValue(i)
-        if (colorval < low):
-            VTKFieldDataArray.SetValue(i,low)
-        elif (colorval < med):
+        if (colorval > high):
+            VTKFieldDataArray.SetValue(i,high)
+        elif (colorval > med):
             VTKFieldDataArray.SetValue(i,med)
         else:
-            VTKFieldDataArray.SetValue(i,high)
+            VTKFieldDataArray.SetValue(i,low)
 
   def regenerateOriginalModelColors(self, modelNode, originalColorArray):
 
@@ -509,6 +521,7 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
         
   def convertSegmentsToSegment(self, probeNode, nodeIds):
     thisScene = probeNode.GetScene()
+
     
     #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap") #added 2/22
     #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap") #added 2/22
@@ -574,23 +587,28 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
 
 def applyTransformToProbe(rm, probeNode, xyz1):
     transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode")
-
+  
     transformMatrixNP = np.array(
     [[rm[0,0],rm[0,1],rm[0,2], xyz1[0]],
     [rm[1,0],rm[1,1],rm[1,2], xyz1[1]],
     [rm[2,0],rm[2,1],rm[2,2], xyz1[2]],
     [0,0,0,1]])
 
+    #print(transformMatrixNP)
+
     transformNode.SetMatrixTransformToParent(slicer.util.vtkMatrixFromArray(transformMatrixNP))
     
     slicer.app.processEvents()  
-    time.sleep(0.5)
+    time.sleep(0.05)
     probeNode.SetAndObserveTransformNodeID(transformNode.GetID())
     slicer.app.processEvents()  #harden transform would often cause slicer to crash before slowing the program down. 
-    time.sleep(0.5)
+    time.sleep(0.05)
     probeNode.HardenTransform()
-    time.sleep(0.5)
+    time.sleep(0.05)
     slicer.app.processEvents()
+    slicer.mrmlScene.RemoveNode(transformNode)
+
+
 
 
 def rotationMatrixFromVectors(vec1, vec2):
@@ -599,18 +617,21 @@ def rotationMatrixFromVectors(vec1, vec2):
     :param vec2: A 3d "destination" vector
     :return mat: A transform matrix (3x3) which when applied to vec1, aligns it with vec2.
     """
+    print(vec1, " ", vec2)
     a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (vec2 / np.linalg.norm(vec2)).reshape(3)
     v = np.cross(a, b)
     c = np.dot(a, b)
     s = np.linalg.norm(v)
+
     kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
     rotationMatrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
     return rotationMatrix
 
 def duplicateProbeNode(fidPairs, probeNode):
-    numDuplicates = int(fidPairs - 1)
+    #print("Copying: ", probeNode)
+    numDuplicates = int(fidPairs)
     nodeIds = []
-    nodeIds.append(probeNode.GetID())
+    #nodeIds.append(probeNode.GetID())
     if (numDuplicates > 0):
         for i in range(0,numDuplicates):
             
@@ -621,7 +642,7 @@ def duplicateProbeNode(fidPairs, probeNode):
             slicer.mrmlScene.AddNode(segmentationNode)
             
             slicer.app.processEvents()  #force update as occasionally the follow steps cause slicer to crash
-            time.sleep(0.5)
+            time.sleep(0.1)
 
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
@@ -629,17 +650,20 @@ def duplicateProbeNode(fidPairs, probeNode):
             segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
 
             segDisplayNode = probeNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
             segDisplayNode = segmentationNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
 
             slicer.app.processEvents() 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
-            nodeIds.append(segmentationNode.GetID())
+            nodeIds.append(segmentationNode.GetID()) #CHANGED THIS
+            seg_name = probeNode.GetName()
+            new_seg_name = seg_name + "_" + str(i)
+            segmentationNode.SetName(new_seg_name)
 
-    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
-    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+    #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
+    #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
     return nodeIds
 
 
@@ -666,6 +690,9 @@ def findModelToModelDistance(modelNode1,modelNode2):
 
     cliNode = slicer.cli.runSync(slicer.modules.modeltomodeldistance, None, parameters)
     return vtkOutput
+
+    
+      
 
 
 
