@@ -97,10 +97,18 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     ScriptedLoadableModuleWidget.setup(self)
 
-    threeDViewNode1 = slicer.app.layoutManager().threeDWidget(0).threeDController()
-    threeDViewNode1.setWhiteBackground()
-    threeDViewNode2 = slicer.app.layoutManager().threeDWidget(1).threeDController()
-    threeDViewNode2.setWhiteBackground()
+    try:
+       threeDViewNode1 = slicer.app.layoutManager().threeDWidget(0).threeDController()
+       threeDViewNode1.setWhiteBackground()
+    except Exception as e:
+       this_exception = e
+      #print("Didn't find 3D View Open")
+
+    try:
+       threeDViewNode2 = slicer.app.layoutManager().threeDWidget(1).threeDController()
+       threeDViewNode2.setWhiteBackground()
+    except Exception as e:
+       this_exception = e
 
     # Load widget from .ui file (created by Qt Designer).
     uiWidget = slicer.util.loadUI(self.resourcePath('UI/AblationPlanner.ui'))
@@ -156,6 +164,8 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         nodeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     # Make sure parameter node is initialized (needed for module reload)
     #self.initializeParameterNode()
+    self.endPoints_positions = []
+    self.fromDrag = False
     self.updateGUIFromParameterNode()
 
 
@@ -336,11 +346,15 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
   def onTranslateButton(self):
     probeNode = self._parameterNode.GetNodeReference("InputSurface")
-    nodeIds = self.nodeIds
+
+    thisScene = probeNode.GetScene()
+    markupReference = thisScene.GetNodeByID(self.formerMarkupID)
+    markupReference.RemoveObserver(self.observerID)
+    self.removeObservers()
+    nodeIds = self.probeNodeIDs
     combinedProbeNode = self.logic.convertSegmentsToSegment(probeNode, nodeIds)
     self._parameterNode.SetNodeReferenceID("combinedProbeNode", combinedProbeNode.GetID())
 
-    probeNode.SetDisplayVisibility(0)
 
   def onHardenButton(self):
     tumorNode = self._parameterNode.GetNodeReference("InputTumor")
@@ -352,54 +366,54 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     
   #this is the "Place Probes" button
   def onProbeButton(self):
-    self.updateParameterNodeFromGUI()
-    try:
-        slicer.util.showStatusMessage("Processing...")
-        slicer.app.processEvents()  # force update
-        #preprocessedPolyData = self.getPreprocessedPolyData()
-        endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
-        if not endPointsMarkupsNode:
-            endPointsMarkupsNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode",
-                slicer.mrmlScene.GetUniqueNameByString("Centerline endpoints"))
-            endPointsMarkupsNode.CreateDefaultDisplayNodes()
-            self._parameterNode.SetNodeReferenceID("EndPoints", endPointsMarkupsNode.GetID())
-    except Exception as e:
-        slicer.util.errorDisplay("Failed to detect end points: "+str(e))
-    self.updateParameterNodeFromGUI()
+     self.updateParameterNodeFromGUI()
+     if True:
+       xyz = []
+       endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
+       probeNode = self._parameterNode.GetNodeReference("InputSurface")
+       #print("Found an input probe: ", probeNode)
+       probeDisplayNode = probeNode.GetDisplayNode()
+       probeDisplayNode.SetVisibility(False)
 
-    endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
-    probeNode = self._parameterNode.GetNodeReference("InputSurface")
-    if probeNode is None:
-        print("probe segmentation is invalid")
-        return
-    
-    self.nodeIds = self.logic.process(endPointsMarkupsNode, probeNode)
-    #endPointsMarkupsNode.SetDisplayVisibility(0)
-    #probeDisplayNode = probeNode.GetDisplayNode()
-    probeType = probeNode.GetSegmentation().GetNthSegment(0).GetName()
-    #except:
-    #    print("cannot change probe color")
-    thisScene = probeNode.GetScene()
-    for i, nodeId in enumerate(self.nodeIds):
-        thisProbeNode = thisScene.GetNodeByID(nodeId)
-        thisProbeNode.SetName("probe"+str(i+1))
-        thisProbeNode.CreateClosedSurfaceRepresentation() #this is needed in order to render the node in 3D
+       for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
+         xyz.append([0,0,0])
 
-<<<<<<< HEAD
-        probeDisplayNode = thisProbeNode.GetDisplayNode()
-        #print(type(probeDisplayNode)) #result: <class 'MRMLCorePython.vtkMRMLSegmentationDisplayNode'>
-        probeDisplayNode.VisibilityOn()
-        probeDisplayNode.Visibility3DOn()
-        probeDisplayNode.SetAllSegmentsVisibility3D(True)
-        probeDisplayNode.SetOpacity(0.4)
+       print("Number of input fiducials found: ", endPointsMarkupsNode.GetNumberOfFiducials())
 
-        probeSegmentNode = thisProbeNode.GetSegmentation().GetNthSegment(0)
-        probeSegmentNode.SetName(probeType)
-        probeSegmentNode.SetColor(0.75,0.6,0.8)
+       if endPointsMarkupsNode.GetNumberOfFiducials() > 2:
+         if (endPointsMarkupsNode.GetNumberOfFiducials()%2 == 1):
+           print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
+         else:
+           fidPairs = endPointsMarkupsNode.GetNumberOfFiducials()/2 
+           probeNodeIDs = duplicateProbeNode(int(fidPairs),probeNode)
+       self.probeNodeIDs = probeNodeIDs
+       print("New probe IDs probes: ", self.probeNodeIDs)
 
+       for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
+         endPointsMarkupsNode.GetNthFiducialPosition(i, xyz[i])
+         self.endPoints_positions.append(xyz) #.GetNthFiducialPosition(0, [1,1,1])
+         #print("At positon: ", i, " found position: ", xyz[i])
+         self.endPoints_positions = xyz
+        
+       #self.endPoints_positions = point_list
+       for i in range(0, len(self.probeNodeIDs)):
+         self.logic.updateProbePosition(self.probeNodeIDs[i], probeNode, [0,0,0], [0,0,-1], self.endPoints_positions[i*2], self.endPoints_positions[i*2+1])
+         #logging.info("Moving probe {0} from {1} , {2} to position {3} , {4}".format(self.probeNodeIDs[i], [0,0,0],[0,0,-1], self.endPoints_positions[i*2], self.endPoints_positions[i*2+1]))
+
+       #endPointsMarkupsNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointStartInteractionEvent, self.onMarkupStartInteraction)
+       if self.fromDrag:
+         #endPointsMarkupsNode.removeObservers()
+         thisScene = probeNode.GetScene()
+         markupReference = thisScene.GetNodeByID(self.formerMarkupID)
+         endPointsMarkupsNode.RemoveObserver(self.observerID)
+         self.removeObservers()
+       self.observerID = endPointsMarkupsNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointEndInteractionEvent, self.onMarkupEndInteraction)
+       self.formerMarkupID = endPointsMarkupsNode.GetID()
 
 
-=======
+
+
+
   def onMarkupEndInteraction(self, caller, event):
     markupsNode = caller
     self.fromDrag = True
@@ -409,7 +423,9 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       probeReference = thisScene.GetNodeByID(probeID)
       slicer.mrmlScene.RemoveNode(probeReference)
       print("Deleted: ", probeID)
->>>>>>> iss_andr
+
+    self.onProbeButton()
+
 
 
 
@@ -436,58 +452,26 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     if not parameterNode:
         print("No parameter node entered!")
 
-  def process(self, fiducialNode, probeNode):
-    print("Processing...")
-    
-    if not fiducialNode:
-        print("Entered fiducial node is null!")
-        return
+  def updateProbePosition(self, probeNodeID, probeNode, xyz1, xyz2, xyz3, xyz4):
+     #print("Updating probe position!")
+     #print(xyz1, " ", xyz2, " ", xyz3, " ", xyz4)
+     
 
-    fidCount = fiducialNode.GetNumberOfFiducials()
+     fiducialDistance1 = (((abs(xyz2[0]-xyz1[0])) ** 2) + (abs(xyz2[1]-xyz1[1]) ** 2) + (abs(xyz2[2]-xyz1[2]) ** 2)) ** 0.5
+     vector1 = [xyz2[0]-xyz1[0], xyz2[1]-xyz1[1], xyz2[2]- xyz1[2]]
+     unitVector1 = [vector1[0]/fiducialDistance1, vector1[1]/fiducialDistance1, vector1[2]/fiducialDistance1]
 
-    defaultPosition = [0,0,-1]
-    xyz = [0,0,0]
-    coordList = []
-    
-    if (fidCount%2 == 1):
-        print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
-    else:
-        fidPairs = fidCount/2 
-        nodeIds = duplicateProbeNode(int(fidPairs),probeNode)
-        
-        for i in range(0, fidCount):
-            xyz = [0,0,0]
-            fiducialNode.GetNthFiducialPosition(i, xyz) #.GetNthFiducialPosition(0, [1,1,1])
-            coordList.append(xyz)
+     fiducialDistance2 = (((abs(xyz4[0]-xyz3[0])) ** 2) + (abs(xyz4[1]-xyz3[1]) ** 2) + (abs(xyz4[2]-xyz3[2]) ** 2)) ** 0.5
+     vector2 = [xyz4[0]-xyz3[0], xyz4[1]-xyz3[1], xyz4[2]- xyz3[2]]
+     unitVector2 = [vector2[0]/fiducialDistance2, vector2[1]/fiducialDistance2, vector2[2]/fiducialDistance2]
 
-    fidDistance = []
-    fidVector = []
-    fidUnitVector = []
-    xyz1s = []
+     rigidRegistrationMatrix = rotationMatrixFromVectors(unitVector1, unitVector2)
+     slicer.app.processEvents()  # force update
+     
+     thisScene = probeNode.GetScene()
+     probeReference = thisScene.GetNodeByID(probeNodeID)
 
-    for i in range(0, fidCount, 2):
-        xyz1 = coordList[i]
-        xyz1s.append(xyz1)
-        xyz2 = coordList[i+1]
-
-        fiducialDistance = (((abs(xyz2[0]-xyz1[0])) ** 2) + (abs(xyz2[1]-xyz1[1]) ** 2) + (abs(xyz2[2]-xyz1[2]) ** 2)) ** 0.5
-        vector = [xyz2[0]-xyz1[0], xyz2[1]-xyz1[1], xyz2[2]- xyz1[2]]
-        unitVector = [vector[0]/fiducialDistance, vector[1]/fiducialDistance, vector[2]/fiducialDistance]
-
-        fidDistance.append(fiducialDistance)
-        fidVector.append(vector)
-        fidUnitVector.append(unitVector)
-        
-        slicer.app.processEvents()
-
-        rigidRegistrationMatrix = rotationMatrixFromVectors(defaultPosition, unitVector)
-        thisScene = probeNode.GetScene()
-        probeReference = thisScene.GetNodeByID(nodeIds[int(i/2)])
-
-        slicer.app.processEvents()  # force update
-        applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz1, int((i/2)+1))
-    return nodeIds
-
+     applyTransformToProbe(rigidRegistrationMatrix, probeReference, xyz3)
     #convertSegmentsToSegment(probeNode, nodeIds)
 
 
@@ -690,26 +674,29 @@ class AblationPlannerLogic(ScriptedLoadableModuleLogic):
     return segmentationNode
 
 
-def applyTransformToProbe(rm, probeNode, xyz1, i):
+def applyTransformToProbe(rm, probeNode, xyz1):
     transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode")
-    transformNode.SetName("probe"+str(i)+" placement")
-    
+  
     transformMatrixNP = np.array(
     [[rm[0,0],rm[0,1],rm[0,2], xyz1[0]],
     [rm[1,0],rm[1,1],rm[1,2], xyz1[1]],
     [rm[2,0],rm[2,1],rm[2,2], xyz1[2]],
     [0,0,0,1]])
 
+    #print(transformMatrixNP)
+
     transformNode.SetMatrixTransformToParent(slicer.util.vtkMatrixFromArray(transformMatrixNP))
     
     slicer.app.processEvents()  
-    time.sleep(0.5)
+    time.sleep(0.05)
     probeNode.SetAndObserveTransformNodeID(transformNode.GetID())
     slicer.app.processEvents()  #harden transform would often cause slicer to crash before slowing the program down. 
-    time.sleep(0.5)
+    time.sleep(0.05)
     probeNode.HardenTransform()
-    time.sleep(0.5)
+    time.sleep(0.05)
     slicer.app.processEvents()
+    slicer.mrmlScene.RemoveNode(transformNode)
+
 
 
 def rotationMatrixFromVectors(vec1, vec2):
@@ -727,9 +714,10 @@ def rotationMatrixFromVectors(vec1, vec2):
     return rotationMatrix
 
 def duplicateProbeNode(fidPairs, probeNode):
-    numDuplicates = int(fidPairs - 1)
+    #print("Copying: ", probeNode)
+    numDuplicates = int(fidPairs)
     nodeIds = []
-    nodeIds.append(probeNode.GetID())
+    #nodeIds.append(probeNode.GetID())
     if (numDuplicates > 0):
         for i in range(0,numDuplicates):
             
@@ -740,7 +728,7 @@ def duplicateProbeNode(fidPairs, probeNode):
             slicer.mrmlScene.AddNode(segmentationNode)
             
             slicer.app.processEvents()  #force update as occasionally the follow steps cause slicer to crash
-            time.sleep(0.5)
+            time.sleep(0.1)
 
             segmentationNode.CreateDefaultDisplayNodes() # only needed for display
             segmentationNode.AddSegmentFromClosedSurfaceRepresentation(mergedImage,"duplicate_node",[0,1,0])
@@ -748,19 +736,21 @@ def duplicateProbeNode(fidPairs, probeNode):
             segmentationNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
 
             segDisplayNode = probeNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
             segDisplayNode = segmentationNode.GetDisplayNode()
-            segDisplayNode.SetOpacity(0.1)
+            segDisplayNode.SetOpacity(0.3)
 
             slicer.app.processEvents() 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
-            nodeIds.append(segmentationNode.GetID())
+            nodeIds.append(segmentationNode.GetID()) #CHANGED THIS
+            seg_name = probeNode.GetName()
+            new_seg_name = seg_name + "_" + str(i)
+            segmentationNode.SetName(new_seg_name)
 
-    probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
-    probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
+    #probeNode.GetSegmentation().CreateRepresentation("Binary labelmap")
+    #probeNode.GetSegmentation().SetMasterRepresentationName("Binary labelmap")
     return nodeIds
-
 
 def convertSegmentToModel(segmentNode, folderName="Folder"):
 
