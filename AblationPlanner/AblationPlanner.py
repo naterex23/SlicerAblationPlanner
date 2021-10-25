@@ -385,6 +385,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         thisProbeNode.SetName("probe"+str(i+1))
         thisProbeNode.CreateClosedSurfaceRepresentation() #this is needed in order to render the node in 3D
 
+<<<<<<< HEAD
         probeDisplayNode = thisProbeNode.GetDisplayNode()
         #print(type(probeDisplayNode)) #result: <class 'MRMLCorePython.vtkMRMLSegmentationDisplayNode'>
         probeDisplayNode.VisibilityOn()
@@ -398,6 +399,17 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
 
 
+=======
+  def onMarkupEndInteraction(self, caller, event):
+    markupsNode = caller
+    self.fromDrag = True
+    thisScene = markupsNode.GetScene()
+    existingMovedProbes = self.probeNodeIDs
+    for probeID in existingMovedProbes:
+      probeReference = thisScene.GetNodeByID(probeID)
+      slicer.mrmlScene.RemoveNode(probeReference)
+      print("Deleted: ", probeID)
+>>>>>>> iss_andr
 
 
 
