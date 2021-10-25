@@ -390,9 +390,6 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.formerMarkupID = endPointsMarkupsNode.GetID()
 
 
-
-
-
   def onMarkupEndInteraction(self, caller, event):
     markupsNode = caller
     self.fromDrag = True
