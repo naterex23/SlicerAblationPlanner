@@ -387,8 +387,8 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
          else:
            fidPairs = endPointsMarkupsNode.GetNumberOfFiducials()/2 
            probeNodeIDs = duplicateProbeNode(int(fidPairs),probeNode)
-       self.probeNodeIDs = probeNodeIDs
-       print("New probe IDs probes: ", self.probeNodeIDs)
+           self.probeNodeIDs = probeNodeIDs
+           print("New probe IDs probes: ", self.probeNodeIDs)
 
        for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
          endPointsMarkupsNode.GetNthFiducialPosition(i, xyz[i])
