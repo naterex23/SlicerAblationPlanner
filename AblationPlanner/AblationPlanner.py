@@ -166,6 +166,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     #self.initializeParameterNode()
     self.endPoints_positions = []
     self.fromDrag = False
+    self.probeNodeIDs = []
     self.updateGUIFromParameterNode()
 
 
