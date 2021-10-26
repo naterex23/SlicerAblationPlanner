@@ -22,7 +22,7 @@ class AblationPlanner(ScriptedLoadableModule):
     self.parent.title = "AblationPlanner"  # TODO: make this more human readable by adding spaces
     self.parent.categories = ["Quantification"]  # TODO: set categories (folders where the module shows up in the module selector)
     self.parent.dependencies = ["ModelToModelDistance"]  # TODO: add here list of module names that this module requires
-    self.parent.contributors = ["Nathaniel Rex (Brown University), Scott Collins (Rhode Island Hospital)"]  # TODO: replace with "Firstname Lastname (Organization)"
+    self.parent.contributors = ["Nathaniel Rex (Brown University), Scott Collins (Rhode Island Hospital), Ben Hsieh (Rhode Island Hospital)"]  # TODO: replace with "Firstname Lastname (Organization)"
     # TODO: update with short description of the module and a link to online module documentation
     self.parent.helpText = """
 See  <a href="https://github.com/naterex23/SlicerAblationPlanner">documentation</a> for details.
