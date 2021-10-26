@@ -381,14 +381,14 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
        print("Number of input fiducials found: ", endPointsMarkupsNode.GetNumberOfFiducials())
 
-       if endPointsMarkupsNode.GetNumberOfFiducials() > 2:
+       if endPointsMarkupsNode.GetNumberOfFiducials() >= 2:
          if (endPointsMarkupsNode.GetNumberOfFiducials()%2 == 1):
            print("You entered an odd number of fiducials. Please enter an even number of fiducials.")
          else:
            fidPairs = endPointsMarkupsNode.GetNumberOfFiducials()/2 
            probeNodeIDs = duplicateProbeNode(int(fidPairs),probeNode)
            self.probeNodeIDs = probeNodeIDs
-           print("New probe IDs probes: ", self.probeNodeIDs)
+           #print("New probe IDs probes: ", self.probeNodeIDs)
 
        for i in range(0, endPointsMarkupsNode.GetNumberOfFiducials()):
          endPointsMarkupsNode.GetNthFiducialPosition(i, xyz[i])
