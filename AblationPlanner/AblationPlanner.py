@@ -156,6 +156,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.PushButton_3.connect('clicked(bool)', self.onMarginButton)
     self.ui.PushButton_4.connect('clicked(bool)', self.onColorButton)
     self.ui.PushButton_5.connect('clicked(bool)', self.onReColorButton)
+    self.ui.PushButton_8.connect('clicked(bool)', self.onLineButton)
 
     self.ui.parameterNodeSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
     self.setParameterNode(self.logic.getParameterNode())
@@ -289,7 +290,37 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
      tumorNode.SetAndObserveTransformNodeID(nativeTableTransform.GetID())
      
+  def onLineButton(self):
+    if self.endPoints_positions is None:
+      print("You haven't entered any fiducials yet!")
+      return 
 
+    lineNodes = slicer.mrmlScene.GetNodesByClass("vtkMRMLMarkupsLineNode")
+
+    if lineNodes is not None:
+      for lineNode in lineNodes:
+        slicer.mrmlScene.RemoveNode(lineNode)
+
+    endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
+    numNodePoints = endPointsMarkupsNode.GetNumberOfControlPoints()
+
+    for i in range(0,numNodePoints,2):
+        fiducialLabel = endPointsMarkupsNode.GetNthFiducialLabel(i)        
+        ras1 = vtk.vtkVector3d(0,0,0)
+        endPointsMarkupsNode.GetNthControlPointPosition(i, ras1)
+        
+        ras2 = vtk.vtkVector3d(0,0,0)
+        endPointsMarkupsNode.GetNthControlPointPosition(i+1, ras2)
+        
+        pointPositions = np.asarray([ras1,ras2])
+        lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode")
+        slicer.util.updateMarkupsControlPointsFromArray(lineNode, pointPositions)
+        lineDisplayNode = lineNode.GetDisplayNode()
+        lineDisplayNode.SetPropertiesLabelVisibility(False)
+        lineDisplayNode.SetPointSize(0.5)
+        lineDisplayNode.SetSelectable(False)
+        slicer.app.processEvents()
+    
 
   def onMarginButton(self):
     try: 
@@ -372,6 +403,9 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
        xyz = []
        endPointsMarkupsNode = self._parameterNode.GetNodeReference("EndPoints")
        probeNode = self._parameterNode.GetNodeReference("InputSurface")
+       if probeNode is None:
+        print("Please enter a valid probe segmentation!")
+        return
        #print("Found an input probe: ", probeNode)
        probeDisplayNode = probeNode.GetDisplayNode()
        probeDisplayNode.SetVisibility(False)
@@ -408,6 +442,7 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
          markupReference = thisScene.GetNodeByID(self.formerMarkupID)
          endPointsMarkupsNode.RemoveObserver(self.observerID)
          self.removeObservers()
+
        self.observerID = endPointsMarkupsNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointEndInteractionEvent, self.onMarkupEndInteraction)
        self.formerMarkupID = endPointsMarkupsNode.GetID()
 
@@ -424,8 +459,10 @@ class AblationPlannerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       probeReference = thisScene.GetNodeByID(probeID)
       slicer.mrmlScene.RemoveNode(probeReference)
       print("Deleted: ", probeID)
-
+    self.onLineButton()
+    print("Moving probes... please wait a few seconds")
     self.onProbeButton()
+    print("Finished moving probes!")
 
 
 
