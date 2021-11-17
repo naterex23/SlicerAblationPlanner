@@ -2,13 +2,12 @@
 
 This is an extension for 3D Slicer that is used to plan and evaluate ablation procedures. 
 
-This module was developed to support research and clinical decision support involving kidney, liver, and lung ablations at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University) with the support of Scott Collins (Rhode Island Hospital). 
+This module was developed to support research and clinical decision support involving kidney, liver, and lung ablations at the Rhode Island Hospital, Providence, Rhode Island. This module was primarily developed by Nathaniel Rex (Brown University) with the support of Scott Collins and Ben Hsieh (Rhode Island Hospital). 
 
 Procedure planning required inputs: 
 1. A pre-procedure "planning" CT/CTA that shows the tumor location. 
 2. A segmented tumor/lesion to be ablated. 
 3. An "ablation profile" as specified by a vendor, generally an ellipsoid that be imported into Slicer as a segmentation. 
-4. 
 
 Ablation Planning Workflow:
 
