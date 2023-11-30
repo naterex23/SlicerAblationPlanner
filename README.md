@@ -58,7 +58,7 @@ AblationPlanner in Action
 
 Disclaimer
 
-SlicerAblationPlanner, same as 3D Slicer, is a research software. SlicerAblationPlanner is NOT an FDA-approved medical device. It is not intended for clinical use. The user assumes full responsibility to comply with the appropriate regulations.
+SlicerAblationPlanner, similar to 3D Slicer, is research software. SlicerAblationPlanner is NOT an FDA-approved medical device. It is not intended for clinical use. The user assumes full responsibility to comply with the appropriate regulations and institutional IRB protocols.
 
 Support
 
