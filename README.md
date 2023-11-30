@@ -54,7 +54,7 @@ Steps 1-8 of the ablation planning workflow are completed before the day of the 
 13. Projected ablation margins surrounding the lesion are evaluated, and the technician and operator make adjustments to probe placement to maximise any margin. Ablation margin information is provided via the a 3D voronoi model (which displays a heatmap based on distance between the tumor and the ablation profile), a printed minimum margin (via the python command line interface), and an output table called "surface_distances" (that contains a variety of data extracted from the 3D voronoi model). The "Signed" column contains information about the signed distance between the two models should these be of interest for research purposes. 
 
 AblationPlanner in Action
-![mid_procedure](/Screenshots/mid_procedure.png)
+![mid_procedure](/Screenshots/mid_procedure.jpg)
 
 Disclaimer
 
